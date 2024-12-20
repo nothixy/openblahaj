@@ -1,0 +1,16 @@
+https://www.iana.org/assignments/dns-svcb/dns-svcb.xhtml
+https://www.iana.org/assignments/arp-parameters/arp-parameters.xhtml
+https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml
+https://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml
+https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml
+https://www.iana.org/assignments/sctp-parameters/sctp-parameters.xhtml
+https://www.iana.org/assignments/ipv6-parameters/ipv6-parameters.xhtml
+https://www.iana.org/assignments/icmp-parameters/icmp-parameters.xhtml
+https://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers.xhtml
+https://www.iana.org/assignments/ethernet-numbers/ethernet-numbers.xhtml
+https://www.iana.org/assignments/icmpv6-parameters/icmpv6-parameters.xhtml
+https://www.iana.org/assignments/igmp-type-numbers/igmp-type-numbers.xhtml
+https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml
+https://www.iana.org/assignments/bootp-dhcp-parameters/bootp-dhcp-parameters.xhtml
+https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml
+https://www.iana.org/assignments/bandwidth-constraints-model-ids/bandwidth-constraints-model-ids.xhtml#bandwidth-constraints-model-ids-2

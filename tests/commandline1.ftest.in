@@ -1,0 +1,22 @@
+#!/bin/sh
+
+PROG=@top_builddir@/openBLAHAJ
+
+echo 1..3
+if ! ${PROG} -w >/dev/null; then
+    echo 'not ok 1 - Unsupported command-line argument'
+else
+    echo 'ok 1 - Unsupported command-line argument'
+fi
+NEWFILE=$(mktemp -u)
+if ! ${PROG} -o ${NEWFILE} >/dev/null; then
+    echo 'not ok 2 - Not a pcap file'
+else
+    echo 'ok 2 - Not a pcap file'
+fi
+rm -f ${NEWFILE}
+if ! ${PROG} -o ${NEWFILE} >/dev/null; then
+    echo 'not ok 3 - File not found'
+else
+    echo 'ok 3 - File not found'
+fi

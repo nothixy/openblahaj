@@ -1,0 +1,5 @@
+#!/bin/sh
+
+PROG=@top_builddir@/openBLAHAJ
+
+exit 0

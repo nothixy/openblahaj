@@ -1,0 +1,24 @@
+#!/bin/sh
+
+PROG=@top_builddir@/openBLAHAJ
+
+echo 1..2
+if ${PROG} -h >/dev/null; then
+    echo 'ok 1 - Supported command-line argument'
+else
+    echo 'not ok 1 - Supported command-line argument'
+fi
+
+find >&2
+
+if ${PROG} -o empty.cap >/dev/null; then
+    echo 'ok 2 - Pcap file opening'
+else
+    echo 'not ok 2 - Pcap file opening'
+fi
+
+if ${PROG} -o empty.cap ; then
+    echo 'ok 2 - Pcap file opening'
+else
+    echo 'not ok 2 - Pcap file opening'
+fi
