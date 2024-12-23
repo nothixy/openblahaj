@@ -51,6 +51,10 @@ bool application_udp_cast(uint16_t port, struct ob_protocol* buffer)
             buffer->dump = ssdp_dump;
             break;
 
+        case 5353: /* mDNS */
+            buffer->dump = dns_dump;
+            break;
+
         case 51000: /* Wireguard */
             buffer->dump = wireguard_dump;
             break;

@@ -750,13 +750,17 @@ static void dns_dump_v3(const struct ob_protocol* buffer, struct dns_header* dh,
         uint16_t DnsQueryClass;
         const char* DnsQueryClassName;
         const char* DnsQueryTypeName;
+        bool add_pad_byte = true;
 
         printf("--- BEGIN DNS QUERY ---\n");
         printf("%-45s = ", "Query Domain Name");
-        offset = dns_dump_name_at_offset(buffer, offset, '.', NULL);
+        offset = dns_dump_name_at_offset(buffer, offset, '.', &add_pad_byte);
         printf("\n");
 
-        offset += 1;
+        if (add_pad_byte)
+        {
+            offset += 1;
+        }
 
         if (offset + (ssize_t) sizeof(uint16_t) > buffer->length)
         {
