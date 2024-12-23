@@ -37,16 +37,16 @@ At the network level :
 - IPv6 (partial -> IPSec not implemented)
 
 At the transport level :
-- ICMP (partial -> ome ICMP message types not implemented)
-- ICMPv6 (partial -> ome ICMP message types not implemented)
-- IGMP / RGMP (partial -> ome IGMP message types not implemented)
-- OSPF (v2 complete, v3 partial -> ome OSPF message types not implemented, no checksum calculation for LSAs)
+- ICMP (partial -> Some ICMP message types not implemented)
+- ICMPv6 (partial -> Some ICMP message types not implemented)
+- IGMP / RGMP (partial -> Some IGMP message types not implemented)
+- OSPF (v2 complete, v3 partial -> Some OSPF message types not implemented, no checksum calculation for LSAs)
 - SCTP (no checksum calculation)
 - TCP
 - UDP
 
 At the application level :
-- BOOTP / DHCP (partial -> ome options missing)
+- BOOTP / DHCP (partial -> Some options missing)
 - DNS
 - FTP
 - HTTP
