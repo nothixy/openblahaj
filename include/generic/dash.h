@@ -16,13 +16,13 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 
 typedef struct {
-    char opt_name;
-    bool allow_flag_unset;
-    bool param_optional;
     const char* param_name;
     const char* longopt_name;
     const char* description;
     void* user_pointer;
+    char opt_name;
+    bool allow_flag_unset;
+    bool param_optional;
 } dash_Longopt;
 
 bool dash_arg_parser(int* argc, char* argv[], dash_Longopt* options);

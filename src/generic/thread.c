@@ -81,7 +81,7 @@ void register_signal_handler(void (*signal_function)(int), int signal)
  */
 void read_message(unsigned char* capture_args, const struct pcap_pkthdr* header, const unsigned char* packet)
 {
-    const void* args_address = capture_args;
+    void* args_address = capture_args;
     uint8_t* packet_copy = NULL;
     struct passed_message* args = (struct passed_message*) args_address;
 
@@ -252,11 +252,12 @@ void* loop_read_packets(void* args)
 {
     struct passed_message* capture_args = args;
     int min_read = capture_args->min_read;
-    global_capture = capture_args->capture;
 
     int pcap_dispatch_status;
-
     sigset_t block;
+
+    global_capture = capture_args->capture;
+
     sigemptyset(&block);
     sigaddset(&block, SIGINT);
 

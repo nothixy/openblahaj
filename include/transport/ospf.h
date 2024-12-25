@@ -18,9 +18,9 @@ struct ospf_header {
         struct {
             uint8_t InstanceID;
             uint8_t Reserved;
-        } __attribute__((packed)) v3;
-    } __attribute__((packed)) Rest;
-} __attribute__((packed));
+        } v3;
+    } Rest;
+};
 
 struct ospf_v2_hello {
     uint32_t Netmask;

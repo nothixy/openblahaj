@@ -98,21 +98,15 @@ void display_error(int error)
     printf("\033[1m[%s]\033[22m", err_str);
 }
 
-/**
- * @brief 
- * @param buffer 
- * @param capture_args 
- * @return 
- */
 static bool handle_command(const char* buffer, struct passed_message* capture_args)
 {
     if (!strncmp("/setfilter", buffer, 10))
     {
+        struct bpf_program fp;
         if (!capture_args->can_use_bpf)
         {
             return true;
         }
-        struct bpf_program fp;
         if (pcap_compile(capture_args->capture, &fp, &buffer[11], 0, capture_args->netmask))
         {
             fprintf(stderr, "[ERR] pcap_compile(): %s\n", pcap_geterr(capture_args->capture));

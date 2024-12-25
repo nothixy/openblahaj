@@ -1,6 +1,8 @@
 #ifndef OB_IP_H
 #define OB_IP_H
 
+extern const char* IP_PROTOCOLS[146];
+
 enum T_IP_PROTOCOL {
     T_IP_PROTOCOL_HOPOPT,
     T_IP_PROTOCOL_ICMP,

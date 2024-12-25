@@ -23,7 +23,7 @@ static void bootp_dump_client_hardware_address(const struct bootp_header* header
 
     if (header->htype == 1)
     {
-        hardware_address = ether_ntoa((struct ether_addr*) header->chaddr);
+        hardware_address = ether_ntoa((const struct ether_addr*) header->chaddr);
         printf("%s", hardware_address);
         return;
     }

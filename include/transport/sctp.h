@@ -3,6 +3,8 @@
 
 #include "generic/protocol.h"
 
+extern struct sctp_reassembly_htable_element* sctp_htable[1 << 16];
+
 struct sctp_reassembly {
     unsigned long buffer_length;
     long long index;

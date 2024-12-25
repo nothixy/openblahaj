@@ -12,6 +12,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include "network/ip.h"
 #include "network/ip4.h"
 #include "generic/bytes.h"
 #include "generic/protocol.h"
@@ -21,8 +22,6 @@
  * Incomplete, it should also compare the packets' IP addresses and not just the ID field
  */
 struct ipv4_reassembly* ipv4_fragmented[(1 << 16)] = {NULL};
-
-extern const char* IP_PROTOCOLS[146];
 
 /**
  * @brief Insert a fragment inside a packet linked list
@@ -239,6 +238,7 @@ void ipv4_dump(struct ob_protocol* buffer)
     uint8_t* hdr = buffer->hdr;
     struct ip ih;
     ssize_t offset;
+    struct ip_pseudo_header pseudo_header;
 
     if ((ssize_t) sizeof(struct ip) > buffer->length)
     {
@@ -302,15 +302,14 @@ void ipv4_dump(struct ob_protocol* buffer)
      * Save values of IP version, addresses, length and protocol for TCP and UDP
      * checksum calculation and segment reassembly
      */
-    struct ip_pseudo_header pseudo_header = {
-        .ip_version = ih.ip_v,
-        .ip_src = ih.ip_src,
-        .ip_dst = ih.ip_dst,
-        .ip_len = be16toh(ih.ip_len) - (uint16_t) (ih.ip_hl * sizeof(uint32_t)),
-        .ip_proto = ih.ip_p,
-    };
+    pseudo_header.ip_version = ih.ip_v;
+    pseudo_header.ip_src = ih.ip_src;
+    pseudo_header.ip_dst = ih.ip_dst;
+    pseudo_header.ip_len = be16toh(ih.ip_len) - (uint16_t) (ih.ip_hl * sizeof(uint32_t));
+    pseudo_header.ip_proto = ih.ip_p;
 
     buffer->pseudo_header = &pseudo_header;
+    buffer->pseudo_header_length = sizeof(struct ip_pseudo_header);
 
     if (buffer->dump != NULL)
     {

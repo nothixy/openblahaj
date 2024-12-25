@@ -5,6 +5,8 @@
 #include "network/ip6.h"
 #include "generic/protocol.h"
 
+extern struct tcp_reassembly_htable_element* tcp_htable[(1 << 16)];
+
 struct tcp_reassembly {
     unsigned long buffer_length;
     long long index;

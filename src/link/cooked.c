@@ -44,7 +44,7 @@ static const char* cooked_get_packet_type(uint16_t ptype)
 
 static void cooked_dump_v3(const struct ob_protocol* buffer, const struct cooked_header* ch)
 {
-    char* ethernet = ether_ntoa((struct ether_addr*) &(ch->address));
+    char* ethernet = ether_ntoa((const struct ether_addr*) &(ch->address));
 
     const char* link_type = link_get_name(buffer->link_type);
 
@@ -70,7 +70,7 @@ static void cooked_dump_v3(const struct ob_protocol* buffer, const struct cooked
 
 static void cooked_dump_v2(const struct ob_protocol* buffer, const struct cooked_header* ch)
 {
-    char* ethernet = ether_ntoa((struct ether_addr*) &(ch->address));
+    char* ethernet = ether_ntoa((const struct ether_addr*) &(ch->address));
 
     printf("%s => ", link_get_name(buffer->link_type));
     printf("Packet type : %s, ", cooked_get_packet_type(be16toh(ch->packet_type)));

@@ -108,16 +108,17 @@ am____top_builddir__openBLAHAJ_SOURCES_DIST = transport/transport.c \
 	transport/igmp.c transport/udp.c transport/tcp.c \
 	transport/sctp.c network/network.c network/ip4.c network/ip.c \
 	network/arp.c network/ip6.c link/link.c link/cooked.c \
-	link/eth.c application/http.c application/ftp.c \
-	application/imap.c application/pop.c application/bootp.c \
-	application/ssdp.c application/smtp.c application/dhcp.c \
-	application/syslog.c application/ripng.c application/telnet.c \
-	application/whois.c application/wireguard.c \
-	application/application.c application/dns.c application/rip.c \
-	application/tls.c generic/bytes.c generic/guid.c \
-	generic/dash.c generic/terminal.c generic/protocol.c \
-	generic/binary.c generic/time.c generic/thread.c openblahaj.c \
-	link/bluetooth.c link/dbus.c
+	link/eth.c application/mqtt.c application/http.c \
+	application/ftp.c application/imap.c application/pop.c \
+	application/bootp.c application/ssdp.c application/smtp.c \
+	application/dhcp.c application/syslog.c application/ripng.c \
+	application/telnet.c application/whois.c \
+	application/wireguard.c application/application.c \
+	application/dns.c application/rip.c application/tls.c \
+	generic/bytes.c generic/guid.c generic/dash.c \
+	generic/terminal.c generic/protocol.c generic/binary.c \
+	generic/time.c generic/thread.c openblahaj.c link/bluetooth.c \
+	link/dbus.c
 am__dirstamp = $(am__leading_dot)dirstamp
 @BUILD_BLUETOOTH_TRUE@am__objects_1 = link/bluetooth.$(OBJEXT)
 @BUILD_DBUS_TRUE@am__objects_2 = link/dbus.$(OBJEXT)
@@ -129,13 +130,13 @@ am___top_builddir__openBLAHAJ_OBJECTS = transport/transport.$(OBJEXT) \
 	network/ip4.$(OBJEXT) network/ip.$(OBJEXT) \
 	network/arp.$(OBJEXT) network/ip6.$(OBJEXT) \
 	link/link.$(OBJEXT) link/cooked.$(OBJEXT) link/eth.$(OBJEXT) \
-	application/http.$(OBJEXT) application/ftp.$(OBJEXT) \
-	application/imap.$(OBJEXT) application/pop.$(OBJEXT) \
-	application/bootp.$(OBJEXT) application/ssdp.$(OBJEXT) \
-	application/smtp.$(OBJEXT) application/dhcp.$(OBJEXT) \
-	application/syslog.$(OBJEXT) application/ripng.$(OBJEXT) \
-	application/telnet.$(OBJEXT) application/whois.$(OBJEXT) \
-	application/wireguard.$(OBJEXT) \
+	application/mqtt.$(OBJEXT) application/http.$(OBJEXT) \
+	application/ftp.$(OBJEXT) application/imap.$(OBJEXT) \
+	application/pop.$(OBJEXT) application/bootp.$(OBJEXT) \
+	application/ssdp.$(OBJEXT) application/smtp.$(OBJEXT) \
+	application/dhcp.$(OBJEXT) application/syslog.$(OBJEXT) \
+	application/ripng.$(OBJEXT) application/telnet.$(OBJEXT) \
+	application/whois.$(OBJEXT) application/wireguard.$(OBJEXT) \
 	application/application.$(OBJEXT) application/dns.$(OBJEXT) \
 	application/rip.$(OBJEXT) application/tls.$(OBJEXT) \
 	generic/bytes.$(OBJEXT) generic/guid.$(OBJEXT) \
@@ -166,9 +167,10 @@ am__depfiles_remade = ./$(DEPDIR)/openblahaj.Po \
 	application/$(DEPDIR)/bootp.Po application/$(DEPDIR)/dhcp.Po \
 	application/$(DEPDIR)/dns.Po application/$(DEPDIR)/ftp.Po \
 	application/$(DEPDIR)/http.Po application/$(DEPDIR)/imap.Po \
-	application/$(DEPDIR)/pop.Po application/$(DEPDIR)/rip.Po \
-	application/$(DEPDIR)/ripng.Po application/$(DEPDIR)/smtp.Po \
-	application/$(DEPDIR)/ssdp.Po application/$(DEPDIR)/syslog.Po \
+	application/$(DEPDIR)/mqtt.Po application/$(DEPDIR)/pop.Po \
+	application/$(DEPDIR)/rip.Po application/$(DEPDIR)/ripng.Po \
+	application/$(DEPDIR)/smtp.Po application/$(DEPDIR)/ssdp.Po \
+	application/$(DEPDIR)/syslog.Po \
 	application/$(DEPDIR)/telnet.Po application/$(DEPDIR)/tls.Po \
 	application/$(DEPDIR)/whois.Po \
 	application/$(DEPDIR)/wireguard.Po generic/$(DEPDIR)/binary.Po \
@@ -366,6 +368,7 @@ network/ip6.c \
 link/link.c \
 link/cooked.c \
 link/eth.c \
+application/mqtt.c \
 application/http.c \
 application/ftp.c \
 application/imap.c \
@@ -526,6 +529,8 @@ application/$(am__dirstamp):
 application/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) application/$(DEPDIR)
 	@: >>application/$(DEPDIR)/$(am__dirstamp)
+application/mqtt.$(OBJEXT): application/$(am__dirstamp) \
+	application/$(DEPDIR)/$(am__dirstamp)
 application/http.$(OBJEXT): application/$(am__dirstamp) \
 	application/$(DEPDIR)/$(am__dirstamp)
 application/ftp.$(OBJEXT): application/$(am__dirstamp) \
@@ -613,6 +618,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@application/$(DEPDIR)/ftp.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@application/$(DEPDIR)/http.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@application/$(DEPDIR)/imap.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@application/$(DEPDIR)/mqtt.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@application/$(DEPDIR)/pop.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@application/$(DEPDIR)/rip.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@application/$(DEPDIR)/ripng.Po@am__quote@ # am--include-marker
@@ -817,6 +823,7 @@ distclean: distclean-am
 	-rm -f application/$(DEPDIR)/ftp.Po
 	-rm -f application/$(DEPDIR)/http.Po
 	-rm -f application/$(DEPDIR)/imap.Po
+	-rm -f application/$(DEPDIR)/mqtt.Po
 	-rm -f application/$(DEPDIR)/pop.Po
 	-rm -f application/$(DEPDIR)/rip.Po
 	-rm -f application/$(DEPDIR)/ripng.Po
@@ -907,6 +914,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f application/$(DEPDIR)/ftp.Po
 	-rm -f application/$(DEPDIR)/http.Po
 	-rm -f application/$(DEPDIR)/imap.Po
+	-rm -f application/$(DEPDIR)/mqtt.Po
 	-rm -f application/$(DEPDIR)/pop.Po
 	-rm -f application/$(DEPDIR)/rip.Po
 	-rm -f application/$(DEPDIR)/ripng.Po

@@ -7,6 +7,8 @@
 
 #define IP_HEADER_LENGTH 20
 
+extern struct ipv4_reassembly* ipv4_fragmented[1 << 16];
+
 struct ipv4_reassembly {
     unsigned long buffer_length;
     unsigned long frag_offset;
@@ -22,7 +24,7 @@ struct ip_pseudo_header {
     uint16_t ip_proto;
     struct in_addr ip_dst;
     struct in_addr ip_src;
-} __attribute__((packed));
+};
 
 struct ip_option_header {
     uint8_t Copied : 1;

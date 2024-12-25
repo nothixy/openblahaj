@@ -21,8 +21,6 @@
 #include "generic/protocol.h"
 #include "transport/transport.h"
 
-extern const char* IP_PROTOCOLS[146];
-
 static const char* ipv6_get_protocol(uint8_t protocol)
 {
     if (protocol >= 146)
@@ -1055,8 +1053,6 @@ static ssize_t ipv6_dump_extension_header(const struct ob_protocol* buffer, ssiz
         
         offset += HeaderExtensionLength;
     }
-
-    return offset;
 }
 
 static void ipv6_dump_v3(const struct ip6_hdr* ipv6)
@@ -1108,6 +1104,7 @@ void ipv6_dump(struct ob_protocol* buffer)
     uint8_t* hdr = buffer->hdr;
     struct ip6_hdr ipv6;
     ssize_t offset;
+    struct ip6_pseudo_header pseudo_header;
 
     if ((ssize_t) sizeof(struct ip6_hdr) > buffer->length)
     {
@@ -1143,15 +1140,14 @@ void ipv6_dump(struct ob_protocol* buffer)
      * Save values of IP version, addresses, length and next header for TCP and UDP
      * checksum calculation and segment reassembly
      */
-    struct ip6_pseudo_header pseudo_header = {
-        .ip6_version = (uint8_t) (be32toh(ipv6.ip6_flow) >> 28),
-        .ip6_dst = ipv6.ip6_dst,
-        .ip6_src = ipv6.ip6_src,
-        .ip6_len = be16toh(ipv6.ip6_plen) - (uint16_t) ((uint16_t) (offset) - sizeof(struct ip6_hdr)),
-        .ip6_next_header = ipv6.ip6_nxt
-    };
+    pseudo_header.ip6_version = (uint8_t) (be32toh(ipv6.ip6_flow) >> 28);
+    pseudo_header.ip6_dst = ipv6.ip6_dst;
+    pseudo_header.ip6_src = ipv6.ip6_src;
+    pseudo_header.ip6_len = be16toh(ipv6.ip6_plen) - (uint16_t) ((uint16_t) (offset) - sizeof(struct ip6_hdr));
+    pseudo_header.ip6_next_header = ipv6.ip6_nxt;
 
     buffer->pseudo_header = &pseudo_header;
+    buffer->pseudo_header_length = sizeof(struct ip6_pseudo_header);
 
     if (buffer->dump != NULL)
     {

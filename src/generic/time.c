@@ -6,7 +6,7 @@
 
 /**
  * @brief Get the current timestamp in UTC timezone
- * @param ts Pointer to the timeval passed by pcap_dispatch()
+ * @param tv Pointer to the timeval passed by pcap_dispatch()
  * @param buf Char array of at least 111 characters
  */
 char* get_timestamp_utc(const struct timeval* tv, char* buf)

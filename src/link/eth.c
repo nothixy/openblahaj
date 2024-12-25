@@ -18,9 +18,9 @@ static void eth_dump_v3(const struct ether_header* hdr)
 
     printf("--- BEGIN ETHERNET MESSAGE ---\n");
 
-    ethernet = ether_ntoa((struct ether_addr*) &(hdr->ether_shost));
+    ethernet = ether_ntoa((const struct ether_addr*) &(hdr->ether_shost));
     printf("%-45s = %s\n", "Destination", ethernet);
-    ethernet = ether_ntoa((struct ether_addr*) &(hdr->ether_dhost));
+    ethernet = ether_ntoa((const struct ether_addr*) &(hdr->ether_dhost));
     printf("%-45s = %s\n", "Source", ethernet);
 
     printf("%-45s = 0x%x (%s)\n", "Type", be16toh(hdr->ether_type), network_get_name(be16toh(hdr->ether_type)));
@@ -32,9 +32,9 @@ static void eth_dump_v2(const struct ether_header* hdr)
 
     printf("Ethernet => ");
 
-    ethernet = ether_ntoa((struct ether_addr*) &(hdr->ether_dhost));
+    ethernet = ether_ntoa((const struct ether_addr*) &(hdr->ether_dhost));
     printf("Destination : %s, ", ethernet);
-    ethernet = ether_ntoa((struct ether_addr*) &(hdr->ether_shost));
+    ethernet = ether_ntoa((const struct ether_addr*) &(hdr->ether_shost));
     printf("Source : %s, ", ethernet);
 
     printf("Type : %s\n", network_get_name(be16toh(hdr->ether_type)));

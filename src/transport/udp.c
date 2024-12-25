@@ -82,6 +82,9 @@ static void udp_dump_v3(const struct ob_protocol* buffer, const struct udphdr* u
             hdr[checksum_offset] = (uint8_t) (checksum >> 8);
             hdr[checksum_offset + 1] = (uint8_t) (checksum);
             break;
+
+        default:
+            break;
     }
 
     printf(" %s\n", checksum_16bitonescomplement_validate(buffer, be16toh(uh->uh_ulen), be16toh(uh->uh_sum), true));

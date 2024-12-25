@@ -262,10 +262,12 @@ static const char* dns_get_rcode(uint8_t rcode)
 
 /**
  * @brief Dump a domain name in a buffer from an offset with a separator
+ * @param buffer Pointer to an ob_protocol structure containing the buffer
  * @param offset Offset in the buffer
  * @param separator Separate parts of a domain with a separator
- * @param data Domain name containing a buffer
  * @param add_pad_byte Pointer to an initially true boolean that becomes false
+ * @param record_length Pointer to an int that will contain the record length
+ * @param disallow_ptr Pointer to a false boolean to disallow pointer compression
  * if we don't need to shift one byte from the buffer after or NULL
  * @return Offset in the buffer after the domain name
  */
@@ -442,9 +444,9 @@ static void dns_dump_https_by_type(const struct ob_protocol* buffer, ssize_t off
 
 /**
  * @brief Dump an HTTPS DNS record from offset in data buffer
+ * @param buffer Pointer to an ob_protocol structure containing the buffer
  * @param record_length Length of the DNS record
  * @param offset Offset 
- * @param data Data buffer 
  */
 static void dns_dump_https(const struct ob_protocol* buffer, uint16_t record_length, ssize_t offset)
 {

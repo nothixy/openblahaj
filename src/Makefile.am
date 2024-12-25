@@ -37,6 +37,7 @@ network/ip6.c \
 link/link.c \
 link/cooked.c \
 link/eth.c \
+application/mqtt.c \
 application/http.c \
 application/ftp.c \
 application/imap.c \

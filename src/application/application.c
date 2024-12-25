@@ -11,6 +11,7 @@
 #include "application/tls.h"
 #include "application/http.h"
 #include "application/imap.h"
+#include "application/mqtt.h"
 #include "application/smtp.h"
 #include "application/ssdp.h"
 #include "generic/protocol.h"
@@ -22,7 +23,7 @@
 #include "application/wireguard.h"
 #include "application/application.h"
 
-bool application_udp_cast(uint16_t port, struct ob_protocol* buffer)
+static bool application_udp_cast(uint16_t port, struct ob_protocol* buffer)
 {
     switch (port)
     {
@@ -67,7 +68,7 @@ bool application_udp_cast(uint16_t port, struct ob_protocol* buffer)
     return true;
 }
 
-bool application_tcp_cast(uint16_t port, struct ob_protocol* buffer)
+static bool application_tcp_cast(uint16_t port, struct ob_protocol* buffer)
 {
     switch (port)
     {
@@ -103,6 +104,10 @@ bool application_tcp_cast(uint16_t port, struct ob_protocol* buffer)
             buffer->dump = tls_dump;
             break;
 
+        case 1883: /* MQTT */
+            buffer->dump = mqtt_dump;
+            break;
+
         default:
             buffer->dump = binary_dump;
             return false;
@@ -111,7 +116,7 @@ bool application_tcp_cast(uint16_t port, struct ob_protocol* buffer)
     return true;
 }
 
-bool application_sctp_cast(uint16_t port, struct ob_protocol* buffer)
+static bool application_sctp_cast(uint16_t port, struct ob_protocol* buffer)
 {
     switch (port)
     {
@@ -129,7 +134,7 @@ bool application_sctp_cast(uint16_t port, struct ob_protocol* buffer)
 
 /**
  * @brief Set the dump function on a message structure
- * @param trasport One of UDP, TCP, SCTP
+ * @param transport One of UDP, TCP, SCTP
  * @param port Port number from the transport layer
  * @param buffer Pointer to the message structure
  */
@@ -152,7 +157,7 @@ bool application_cast(enum T_TRANSPORT transport, uint16_t port, struct ob_proto
     }
 }
 
-const char* application_udp_get_name(uint16_t port)
+static const char* application_udp_get_name(uint16_t port)
 {
     switch (port)
     {
@@ -183,7 +188,7 @@ const char* application_udp_get_name(uint16_t port)
     }
 }
 
-const char* application_tcp_get_name(uint16_t port)
+static const char* application_tcp_get_name(uint16_t port)
 {
     switch (port)
     {
@@ -216,7 +221,7 @@ const char* application_tcp_get_name(uint16_t port)
     }
 }
 
-const char* application_sctp_get_name(uint16_t port)
+static const char* application_sctp_get_name(uint16_t port)
 {
     switch (port)
     {
@@ -230,7 +235,7 @@ const char* application_sctp_get_name(uint16_t port)
 
 /**
  * @brief Get the name of the application layer
- * @param trasport One of UDP, TCP, SCTP
+ * @param transport One of UDP, TCP, SCTP
  * @param port Port number from the transport layer
  * @return Constant string containing the application name
  */

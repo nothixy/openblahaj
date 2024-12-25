@@ -55,7 +55,7 @@ static const char* igmp_get_type(uint8_t type)
     }
 }
 
-void igmp_dump_v3(const struct ob_protocol* buffer, const struct igmp* ih)
+static void igmp_dump_v3(const struct ob_protocol* buffer, const struct igmp* ih)
 {
     char igmp_group[INET_ADDRSTRLEN] = {0};
 
@@ -78,7 +78,7 @@ void igmp_dump_v3(const struct ob_protocol* buffer, const struct igmp* ih)
     printf("%-45s = %s\n", "Group", igmp_group);
 }
 
-void igmp_dump_v2(const struct igmp* ih)
+static void igmp_dump_v2(const struct igmp* ih)
 {
     char igmp_group[INET_ADDRSTRLEN] = {0};
 

@@ -69,6 +69,11 @@ struct ob_protocol {
     void* pseudo_header;
 
     /**
+     * Length (in bytes) of the previous field
+     */
+    size_t pseudo_header_length;
+
+    /**
      * Link type as returned by pcap_
      */
     int link_type;

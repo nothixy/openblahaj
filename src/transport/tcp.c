@@ -101,6 +101,9 @@ static uint16_t tcp_hash_element(const struct ob_protocol* buffer, uint16_t sour
                 hash ^= ip6h.ip6_src.s6_addr16[i];
             }
             break;
+
+        default:
+            break;
     }
 
     hash ^= source_port;
@@ -156,6 +159,9 @@ static struct tcp_reassembly_htable_element* tcp_find_hashtable(const struct ob_
                 tcp_htable[hash]->ipv6.destination_ip = ip6h.ip6_dst;
                 tcp_htable[hash]->ipv6.source_ip = ip6h.ip6_src;
                 break;
+
+            default:
+                break;
         }
 
         return tcp_htable[hash];
@@ -191,6 +197,9 @@ static struct tcp_reassembly_htable_element* tcp_find_hashtable(const struct ob_
                     return begin;
                 }
                 break;
+
+            default:
+                break;
         }
         previous = begin;
         begin = begin->next;
@@ -222,6 +231,9 @@ static struct tcp_reassembly_htable_element* tcp_find_hashtable(const struct ob_
             previous->next->ipv6.destination_ip = ip6h.ip6_dst;
             previous->next->ipv6.source_ip = ip6h.ip6_src;
             break;
+
+        default:
+            break;
     }
 
     return previous->next;
@@ -240,6 +252,9 @@ static struct tcp_reassembly_htable_element* tcp_find_hashtable(const struct ob_
 static void tcp_insert_fragment(const struct ob_protocol* buffer, ssize_t offset, unsigned long length, uint32_t Seq, uint8_t SYN, uint8_t PSH, struct tcp_reassembly_htable_element* htable_element)
 {
     const uint8_t* hdr = buffer->hdr;
+    struct tcp_reassembly* identified;
+    struct tcp_reassembly* previous;
+    struct tcp_reassembly* current;
     if (offset + (ssize_t) length > buffer->length)
     {
         longjmp(*(buffer->catcher), OB_ERROR_BUFFER_OVERFLOW);
@@ -273,8 +288,8 @@ static void tcp_insert_fragment(const struct ob_protocol* buffer, ssize_t offset
         memcpy(htable_element->buffers->buffer, &hdr[offset], length);
         return;
     }
-    struct tcp_reassembly* identified = htable_element->buffers;
-    struct tcp_reassembly* previous = htable_element->buffers;
+    identified = htable_element->buffers;
+    previous = htable_element->buffers;
     while (identified->Seq <= Seq)
     {
         previous = identified;
@@ -284,7 +299,7 @@ static void tcp_insert_fragment(const struct ob_protocol* buffer, ssize_t offset
             break;
         }
     }
-    struct tcp_reassembly* current = malloc(sizeof(struct tcp_reassembly));
+    current = malloc(sizeof(struct tcp_reassembly));
     if (current == NULL)
     {
         longjmp(*(buffer->catcher), OB_ERROR_MEMORY_ALLOCATION);
@@ -780,6 +795,9 @@ static void tcp_dump_v3(const struct ob_protocol* buffer, struct tcphdr* th)
             checksum = (uint16_t) checksum;
             hdr[checksum_offset] = (uint8_t) (checksum >> 8);
             hdr[checksum_offset + 1] = (uint8_t) (checksum);
+            break;
+
+        default:
             break;
     }
     

@@ -266,7 +266,7 @@ static char* dhcp_get_client_id(const struct ob_protocol* buffer, ssize_t offset
     switch (hdr[offset])
     {
         case 0x1:
-            return ether_ntoa((struct ether_addr*) &hdr[offset + 1]);
+            return ether_ntoa((const struct ether_addr*) &hdr[offset + 1]);
 
         default:
             return unknown;
@@ -434,13 +434,14 @@ static void dhcp_dump_auth(const struct ob_protocol* buffer, ssize_t offset, uin
 static void dhcp_dump_client_system_arch_type(const struct ob_protocol* buffer, ssize_t offset)
 {
     const uint8_t* data = buffer->hdr;
+    uint16_t type;
 
     if (offset + (ssize_t) sizeof(uint16_t) > buffer->length)
     {
         longjmp(*(buffer->catcher), OB_ERROR_BUFFER_OVERFLOW);
     }
 
-    uint16_t type = be16toh(read_u16_unaligned(&data[offset]));
+    type = be16toh(read_u16_unaligned(&data[offset]));
 
     switch (type)
     {

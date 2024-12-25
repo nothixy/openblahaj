@@ -612,6 +612,7 @@ static void ospf_v3_dump(const struct ob_protocol* buffer, uint8_t Type, ssize_t
 
         case 4:
             ospf_v3_dump_lsu(buffer, offset);
+            break;
 
         default:
             break;

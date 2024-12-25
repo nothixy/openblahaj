@@ -2,4 +2,6 @@
 
 PROG=@top_builddir@/openBLAHAJ
 
+${PROG} -o $1
+
 exit 0

@@ -19,10 +19,6 @@
 #include "generic/terminal.h"
 #include "generic/constants.h"
 
-extern struct ipv4_reassembly* ipv4_fragmented[1 << 16];
-extern struct sctp_reassembly_htable_element* sctp_htable[1 << 16];
-extern struct tcp_reassembly_htable_element* tcp_htable[(1 << 16)];
-
 /**
  * @brief List all interfaces and let the user select
  * @param args Pointer to a dash_arguments structure
@@ -146,10 +142,10 @@ static int pcap_setup(struct dash_arguments* args, pcap_t** capture, struct pass
 {
     char errbuf[PCAP_ERRBUF_SIZE];
     bpf_u_int32 netaddr;
-    capture_args->can_use_bpf = true;
     int pcap_activate_status;
-
     struct bpf_program fp;
+
+    capture_args->can_use_bpf = true;
 
     /**
      * Reading from a file
@@ -372,7 +368,7 @@ static int setup_arguments(int* argc, char** argv, struct dash_arguments* args)
 /**
  * @brief Free memory used by all fragmented packets
  */
-void free_fragmentated(void)
+static void free_fragmentated(void)
 {
     for (uint32_t i = 0; i < (1 << 16); ++i)
     {
@@ -380,6 +376,7 @@ void free_fragmentated(void)
         while (elt != NULL)
         {
             struct tcp_reassembly* seq = elt->buffers;
+            struct tcp_reassembly_htable_element* elt_next;
             while (seq != NULL)
             {
                 struct tcp_reassembly* next = seq->next;
@@ -387,9 +384,9 @@ void free_fragmentated(void)
                 free(seq);
                 seq = next;
             }
-            struct tcp_reassembly_htable_element* next = elt->next;
+            elt_next = elt->next;
             free(elt);
-            elt = next;
+            elt = elt_next;
         }
         tcp_htable[i] = NULL;
     }
@@ -400,6 +397,7 @@ void free_fragmentated(void)
         while (elt != NULL)
         {
             struct sctp_reassembly* seq = elt->buffers;
+            struct sctp_reassembly_htable_element* elt_next;
             while (seq != NULL)
             {
                 struct sctp_reassembly* next = seq->next;
@@ -407,9 +405,9 @@ void free_fragmentated(void)
                 free(seq);
                 seq = next;
             }
-            struct sctp_reassembly_htable_element* next = elt->next;
+            elt_next = elt->next;
             free(elt);
-            elt = next;
+            elt = elt_next;
         }
         sctp_htable[i] = NULL;
     }
@@ -442,7 +440,7 @@ int main(int argc, char* argv[])
     int received_signal;
 
     pthread_t packet;
-    pthread_t input;
+    pthread_t input = 0;
 
     pthread_mutex_t console;
 

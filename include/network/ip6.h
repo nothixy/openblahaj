@@ -61,7 +61,7 @@ struct ip6_shim {
             uint64_t ip6s_tsf : 48;
         } __attribute__((packed));
     } ip6s_flw;
-} __attribute__((packed));
+};
 
 struct ip6_secu {
     uint32_t ip6s_spi;

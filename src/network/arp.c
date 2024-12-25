@@ -179,9 +179,9 @@ static void arp_dump_v3(const struct ob_protocol* buffer, const struct arphdr* a
             longjmp(*(buffer->catcher), OB_ERROR_BUFFER_OVERFLOW);
         }
 
-        ethernet = ether_ntoa((struct ether_addr*) &hdr[sizeof(struct arphdr)]);
+        ethernet = ether_ntoa((const struct ether_addr*) &hdr[sizeof(struct arphdr)]);
         printf("%-45s = %s\n", "Sender hardware address", ethernet);
-        ethernet = ether_ntoa((struct ether_addr*) &hdr[sizeof(struct arphdr) + ah->ar_pln + ah->ar_hln]);
+        ethernet = ether_ntoa((const struct ether_addr*) &hdr[sizeof(struct arphdr) + ah->ar_pln + ah->ar_hln]);
         printf("%-45s = %s\n", "Target hardware address", ethernet);
     }
 

@@ -224,6 +224,9 @@ static uint16_t sctp_hash_element(const struct ob_protocol* buffer, uint16_t sou
                 hash ^= ip6h.ip6_src.s6_addr16[i];
             }
             break;
+
+        default:
+            break;
     }
 
     hash ^= source_port;
@@ -286,6 +289,9 @@ static struct sctp_reassembly_htable_element* sctp_find_hashtable(const struct o
                 sctp_htable[hash]->ipv6.destination_ip = ip6h.ip6_dst;
                 sctp_htable[hash]->ipv6.source_ip = ip6h.ip6_src;
                 break;
+
+            default:
+                break;
         }
 
         return sctp_htable[hash];
@@ -322,6 +328,9 @@ static struct sctp_reassembly_htable_element* sctp_find_hashtable(const struct o
                 {
                     return begin;
                 }
+                break;
+
+            default:
                 break;
         }
         previous = begin;
@@ -361,6 +370,9 @@ static struct sctp_reassembly_htable_element* sctp_find_hashtable(const struct o
             previous->next->ipv6.destination_ip = ip6h.ip6_dst;
             previous->next->ipv6.source_ip = ip6h.ip6_src;
             break;
+
+        default:
+            break;
     }
 
     return previous->next;
@@ -380,6 +392,9 @@ static struct sctp_reassembly_htable_element* sctp_find_hashtable(const struct o
 static void sctp_insert_fragment(const struct ob_protocol* buffer, ssize_t offset, unsigned long length, uint32_t TSN, uint8_t Flag_E, uint8_t Flag_B, uint8_t Flag_U, struct sctp_reassembly_htable_element* htable_element)
 {
     const uint8_t* hdr = buffer->hdr;
+    struct sctp_reassembly* identified;
+    struct sctp_reassembly* previous;
+    struct sctp_reassembly* current;
     if (offset + (ssize_t) length > buffer->length)
     {
         longjmp(*(buffer->catcher), OB_ERROR_BUFFER_OVERFLOW);
@@ -409,8 +424,8 @@ static void sctp_insert_fragment(const struct ob_protocol* buffer, ssize_t offse
         memcpy(htable_element->buffers->buffer, &hdr[offset], length * sizeof(uint8_t));
         return;
     }
-    struct sctp_reassembly* identified = htable_element->buffers;
-    struct sctp_reassembly* previous = htable_element->buffers;
+    identified = htable_element->buffers;
+    previous = htable_element->buffers;
     while (identified->TSN < TSN)
     {
         previous = identified;
@@ -420,7 +435,7 @@ static void sctp_insert_fragment(const struct ob_protocol* buffer, ssize_t offse
             break;
         }
     }
-    struct sctp_reassembly* current = malloc(sizeof(struct sctp_reassembly));
+    current = malloc(sizeof(struct sctp_reassembly));
     if (current == NULL)
     {
         longjmp(*(buffer->catcher), OB_ERROR_MEMORY_ALLOCATION);
