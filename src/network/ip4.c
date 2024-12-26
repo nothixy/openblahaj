@@ -10,7 +10,7 @@
 #include <netinet/udp.h>
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+    #include "config.h"
 #endif
 #include "network/ip.h"
 #include "network/ip4.h"
@@ -113,7 +113,7 @@ static bool ipv4_complete(uint16_t ident)
         }
         current = current->next;
     }
-    return (current->more_fragment == false);
+    return current->more_fragment == false;
 }
 
 /**
@@ -256,7 +256,7 @@ void ipv4_dump(struct ob_protocol* buffer)
     {
         longjmp(*(buffer->catcher), OB_ERROR_INVALID_VALUES);
     }
-    
+
     switch (buffer->verbosity_level)
     {
         case OB_VERBOSITY_LEVEL_LOW:

@@ -6,7 +6,7 @@
 #include <arpa/inet.h>
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+    #include "config.h"
 #endif
 #include "network/ip4.h"
 #include "network/ip6.h"
@@ -461,7 +461,7 @@ static void dns_dump_https(const struct ob_protocol* buffer, uint16_t record_len
     {
         longjmp(*(buffer->catcher), OB_ERROR_BUFFER_OVERFLOW);
     }
-    
+
     priority = be16toh(read_u16_unaligned(&data[offset + new_offset]));
     printf("0x%x ", priority);
     new_offset += 2;
@@ -523,7 +523,7 @@ static void dns_dump_soa(const struct ob_protocol* buffer, ssize_t offset)
 static void dns_dump_rr(const struct ob_protocol* buffer, uint16_t type, uint16_t record_length, ssize_t offset)
 {
     const uint8_t* data = buffer->hdr;
-    
+
     char ipv4_addr[INET_ADDRSTRLEN] = {0};
     char ipv6_addr[INET6_ADDRSTRLEN] = {0};
 
@@ -580,7 +580,7 @@ static ssize_t dns_dump_answer(const struct ob_protocol* buffer, uint16_t i, ssi
     struct dns_header dh;
 
     memcpy(&dh, buffer->hdr, sizeof(struct dns_header));
-    
+
     if (i < be16toh(dh.NumberAnswers))
     {
         printf("--- BEGIN DNS ANSWER RR ---\n");

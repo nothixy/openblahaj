@@ -2,7 +2,7 @@
 #include <string.h>
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+    #include "config.h"
 #endif
 #include "generic/bytes.h"
 #include "application/tls.h"

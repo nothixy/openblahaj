@@ -26,49 +26,51 @@ enum COLORS {
 
 static void print_in_color(FILE* output, const char* str, enum COLORS color)
 {
-    #if defined(_WIN32) || defined(WIN32)
-        static HANDLE  hConsole = NULL;
-        WORD windows_color_code;
-        switch(color)
-        {
-            case COLOR_BLUE:
-                windows_color_code = FOREGROUND_BLUE;
-                break;
-            case COLOR_RED:
-                windows_color_code = FOREGROUND_RED;
-                break;
-            case COLOR_GREEN:
-                windows_color_code = FOREGROUND_GREEN;
-                break;
-            default:
-                windows_color_code = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED;
-                break;
-        }
+#if defined(_WIN32) || defined(WIN32)
+    static HANDLE hConsole = NULL;
+    WORD windows_color_code;
+    switch (color)
+    {
+        case COLOR_BLUE:
+            windows_color_code = FOREGROUND_BLUE;
+            break;
+        case COLOR_RED:
+            windows_color_code = FOREGROUND_RED;
+            break;
+        case COLOR_GREEN:
+            windows_color_code = FOREGROUND_GREEN;
+            break;
+        default:
+            windows_color_code = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED;
+            break;
+    }
 
-        if(hConsole == NULL)
-            hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-        SetConsoleTextAttribute(hConsole, windows_color_code);
-        fprintf(output, "%s", str);
-        SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
-    #else
-        int linux_color_code;
-        switch(color)
-        {
-            case COLOR_BLUE:
-                linux_color_code = 34;
-                break;
-            case COLOR_RED:
-                linux_color_code = 31;
-                break;
-            case COLOR_GREEN:
-                linux_color_code = 32;
-                break;
-            default:
-                linux_color_code = 0;
-                break;
-        }
-        fprintf(output, "\033[%dm%s\033[0m", linux_color_code, str);
-    #endif
+    if (hConsole == NULL)
+    {
+        hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    }
+    SetConsoleTextAttribute(hConsole, windows_color_code);
+    fprintf(output, "%s", str);
+    SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
+#else
+    int linux_color_code;
+    switch (color)
+    {
+        case COLOR_BLUE:
+            linux_color_code = 34;
+            break;
+        case COLOR_RED:
+            linux_color_code = 31;
+            break;
+        case COLOR_GREEN:
+            linux_color_code = 32;
+            break;
+        default:
+            linux_color_code = 0;
+            break;
+    }
+    fprintf(output, "\033[%dm%s\033[0m", linux_color_code, str);
+#endif
 }
 
 static size_t calculate_print_spacing(const dash_Longopt* options)
@@ -121,7 +123,7 @@ void dash_print_usage(const char* argv0, const char* header, const char* footer,
 {
     size_t max_length;
 
-    if(output_file == NULL)
+    if (output_file == NULL)
     {
         output_file = stderr;
     }
@@ -223,7 +225,7 @@ void dash_print_usage(const char* argv0, const char* header, const char* footer,
         {
             fputc(' ', output_file);
         }
-        if(options[i].description != NULL)
+        if (options[i].description != NULL)
         {
             for (int j = 0; options[i].description[j] != '\0'; j++)
             {
@@ -242,7 +244,6 @@ void dash_print_usage(const char* argv0, const char* header, const char* footer,
     fputs(footer, output_file);
     fputc('\n', output_file);
 }
-
 
 void dash_print_summary(int argc, char** argv, const dash_Longopt* options, FILE* output_file)
 {
@@ -266,7 +267,7 @@ void dash_print_summary(int argc, char** argv, const dash_Longopt* options, FILE
             {
                 fprintf(output_file, "%-35c = (bool) ", options[i].opt_name);
             }
-            if ((* (bool*) options[i].user_pointer))
+            if (*(bool*) options[i].user_pointer)
             {
                 print_in_color(output_file, "True", COLOR_GREEN);
             }
@@ -286,7 +287,7 @@ void dash_print_summary(int argc, char** argv, const dash_Longopt* options, FILE
             {
                 fprintf(output_file, "%-35c = (string) ", options[i].opt_name);
             }
-            if ((value = * (char**) options[i].user_pointer))
+            if ((value = *(char**) options[i].user_pointer))
             {
                 print_in_color(output_file, value, COLOR_BLUE);
             }
@@ -338,7 +339,6 @@ static int assign_longopt(char** argument, const dash_Longopt* options, int stru
     int index_of_delimiter;
     unsigned long argument_length;
 
-
     char* dest_addr;
 
     // Search through all allowed arguments
@@ -375,11 +375,11 @@ static int assign_longopt(char** argument, const dash_Longopt* options, int stru
                 return -1;
             }
             *((char**) options[i].user_pointer) = malloc((argument_length + 1) * sizeof(char));
-            if(*((char**) options[i].user_pointer) == NULL)
+            if (*((char**) options[i].user_pointer) == NULL)
             {
                 return -1;
             }
-            dest_addr = * ((char**) options[i].user_pointer);
+            dest_addr = *((char**) options[i].user_pointer);
             strcpy(&dest_addr[options[i].allow_flag_unset], &(*argument)[index_of_delimiter + 3]);
             *argument = NULL;
             return i;
@@ -441,13 +441,13 @@ bool dash_arg_parser(int* argc, char* argv[], dash_Longopt* options)
         }
 
         // We put each pointer to NULL so we can know if they were allocated or not int the future.
-        if(options[structure_length].param_name == NULL)
+        if (options[structure_length].param_name == NULL)
         {
-            *((bool*)options[structure_length].user_pointer) = false;
+            *((bool*) options[structure_length].user_pointer) = false;
         }
         else
         {
-            *((char**)options[structure_length].user_pointer) = NULL;
+            *((char**) options[structure_length].user_pointer) = NULL;
         }
         structure_length++;
     }
@@ -469,16 +469,16 @@ bool dash_arg_parser(int* argc, char* argv[], dash_Longopt* options)
                 {
                     argument_length += 1;
                 }
-                if (* ((char**) options[found_structure_index].user_pointer) != NULL)
+                if (*((char**) options[found_structure_index].user_pointer) != NULL)
                 {
                     return false;
                 }
                 *((char**) options[found_structure_index].user_pointer) = malloc((argument_length + 1) * sizeof(char));
-                if(*((char**) options[found_structure_index].user_pointer) == NULL)
+                if (*((char**) options[found_structure_index].user_pointer) == NULL)
                 {
                     return false;
                 }
-                dest_addr = * ((char**) options[found_structure_index].user_pointer);
+                dest_addr = *((char**) options[found_structure_index].user_pointer);
                 strcpy(&dest_addr[options[found_structure_index].allow_flag_unset], argv[i]);
                 if (options[found_structure_index].allow_flag_unset)
                 {
@@ -498,16 +498,16 @@ bool dash_arg_parser(int* argc, char* argv[], dash_Longopt* options)
                     {
                         argument_length += 1;
                     }
-                    if (* ((char**) options[found_structure_index].user_pointer) != NULL)
+                    if (*((char**) options[found_structure_index].user_pointer) != NULL)
                     {
                         return false;
                     }
                     *((char**) options[found_structure_index].user_pointer) = malloc((argument_length + 1) * sizeof(char));
-                    if(*((char**) options[found_structure_index].user_pointer) == NULL)
+                    if (*((char**) options[found_structure_index].user_pointer) == NULL)
                     {
                         return false;
                     }
-                    dest_addr = * ((char**) options[found_structure_index].user_pointer);
+                    dest_addr = *((char**) options[found_structure_index].user_pointer);
                     strcpy(&dest_addr[options[found_structure_index].allow_flag_unset], argv[i]);
                     if (options[found_structure_index].allow_flag_unset)
                     {
@@ -520,14 +520,14 @@ bool dash_arg_parser(int* argc, char* argv[], dash_Longopt* options)
                 else
                 {
                     *((char**) options[found_structure_index].user_pointer) = malloc((1 + options[found_structure_index].allow_flag_unset) * sizeof(char));
-                    if(*((char**) options[found_structure_index].user_pointer) == NULL)
+                    if (*((char**) options[found_structure_index].user_pointer) == NULL)
                     {
                         return false;
                     }
-                    (* ((char**) options[found_structure_index].user_pointer))[options[found_structure_index].allow_flag_unset] = '\0';
+                    (*((char**) options[found_structure_index].user_pointer))[options[found_structure_index].allow_flag_unset] = '\0';
                     if (options[found_structure_index].allow_flag_unset)
                     {
-                        (* ((char**) options[found_structure_index].user_pointer))[0] = last_opt_was_unset ? '+' : '-';
+                        (*((char**) options[found_structure_index].user_pointer))[0] = last_opt_was_unset ? '+' : '-';
                     }
                 }
             }
@@ -558,16 +558,16 @@ bool dash_arg_parser(int* argc, char* argv[], dash_Longopt* options)
                     {
                         argument_length += 1;
                     }
-                    if (* ((char**) options[found_structure_index].user_pointer) != NULL)
+                    if (*((char**) options[found_structure_index].user_pointer) != NULL)
                     {
                         return false;
                     }
-                    * ((char**) options[found_structure_index].user_pointer) = malloc((argument_length + 1) * sizeof(char));
-                    if(*((char**) options[found_structure_index].user_pointer) == NULL)
+                    *((char**) options[found_structure_index].user_pointer) = malloc((argument_length + 1) * sizeof(char));
+                    if (*((char**) options[found_structure_index].user_pointer) == NULL)
                     {
                         return false;
                     }
-                    unset_dest_addr = * ((char**) options[found_structure_index].user_pointer);
+                    unset_dest_addr = *((char**) options[found_structure_index].user_pointer);
                     strcpy(&unset_dest_addr[options[found_structure_index].allow_flag_unset], &argv[i][c]);
                     if (options[found_structure_index].allow_flag_unset)
                     {
@@ -624,12 +624,12 @@ bool dash_arg_parser(int* argc, char* argv[], dash_Longopt* options)
                     {
                         unset_argument_length += 1;
                     }
-                    if (* ((char**) options[found_structure_index].user_pointer) != NULL)
+                    if (*((char**) options[found_structure_index].user_pointer) != NULL)
                     {
                         return false;
                     }
-                    * ((char**) options[found_structure_index].user_pointer) = malloc((unset_argument_length + 1) * sizeof(char));
-                    short_dest_addr = * ((char**) options[found_structure_index].user_pointer);
+                    *((char**) options[found_structure_index].user_pointer) = malloc((unset_argument_length + 1) * sizeof(char));
+                    short_dest_addr = *((char**) options[found_structure_index].user_pointer);
                     strcpy(&short_dest_addr[options[found_structure_index].allow_flag_unset], &argv[i][c]);
                     if (options[found_structure_index].allow_flag_unset)
                     {
@@ -653,19 +653,19 @@ REORGANIZE:
 
     if (found_structure_index != -1 && options[found_structure_index].param_optional && options[found_structure_index].param_name != NULL && !long_opt_was_provided_with_equal)
     {
-        if (* ((char**) options[found_structure_index].user_pointer) != NULL)
+        if (*((char**) options[found_structure_index].user_pointer) != NULL)
         {
             return false;
         }
         *((char**) options[found_structure_index].user_pointer) = malloc((1 + options[found_structure_index].allow_flag_unset) * sizeof(char));
-        if(*((char**) options[found_structure_index].user_pointer) == NULL)
+        if (*((char**) options[found_structure_index].user_pointer) == NULL)
         {
             return false;
         }
-        (* ((char**) options[found_structure_index].user_pointer))[options[found_structure_index].allow_flag_unset] = '\0';
+        (*((char**) options[found_structure_index].user_pointer))[options[found_structure_index].allow_flag_unset] = '\0';
         if (options[found_structure_index].allow_flag_unset)
         {
-            (* ((char**) options[found_structure_index].user_pointer))[0] = last_opt_was_unset ? '+' : '-';
+            (*((char**) options[found_structure_index].user_pointer))[0] = last_opt_was_unset ? '+' : '-';
         }
     }
 
@@ -703,9 +703,9 @@ void dash_free(dash_Longopt* options)
         }
 
         // We put each pointer to NULL so we can know if they were allocated or not int the future.
-        if(options[structure_length].param_name != NULL)
+        if (options[structure_length].param_name != NULL)
         {
-            char** p = (char**)options[structure_length].user_pointer;
+            char** p = (char**) options[structure_length].user_pointer;
             free(*p);
             *p = NULL;
         }

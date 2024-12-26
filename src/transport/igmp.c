@@ -4,7 +4,7 @@
 #include <netinet/igmp.h>
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+    #include "config.h"
 #endif
 #include "generic/bytes.h"
 #include "transport/igmp.h"

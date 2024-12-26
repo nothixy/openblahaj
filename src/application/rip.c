@@ -5,7 +5,7 @@
 #include <arpa/inet.h>
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+    #include "config.h"
 #endif
 #include "network/ip4.h"
 #include "application/rip.h"

@@ -5,7 +5,7 @@
 #include <arpa/inet.h>
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+    #include "config.h"
 #endif
 #include "network/ip6.h"
 #include "generic/protocol.h"
@@ -104,7 +104,7 @@ void ripng_dump(struct ob_protocol* buffer)
     size_t entry_count;
 
     memcpy(&rh, buffer->hdr, sizeof(struct ripng_header));
-    
+
     entry_count = ((size_t) buffer->length - sizeof(struct ripng_header)) / sizeof(struct ripng_entry);
 
     switch (buffer->verbosity_level)

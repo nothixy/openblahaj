@@ -9,7 +9,7 @@
 #include <netinet/tcp.h>
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+    #include "config.h"
 #endif
 #include "generic/time.h"
 #include "generic/bytes.h"
@@ -28,7 +28,7 @@ static const char* tcp_get_option(uint8_t Option)
 
         case 1:
             return "NOOP";
-        
+
         case 2:
             return "Maximum segment size";
 
@@ -81,7 +81,7 @@ static uint16_t tcp_hash_element(const struct ob_protocol* buffer, uint16_t sour
     struct ip_pseudo_header iph;
     struct ip6_pseudo_header ip6h;
 
-    ip_version = * (uint8_t*) buffer->pseudo_header;
+    ip_version = *(uint8_t*) buffer->pseudo_header;
 
     switch (ip_version)
     {
@@ -129,7 +129,7 @@ static struct tcp_reassembly_htable_element* tcp_find_hashtable(const struct ob_
     struct ip6_pseudo_header ip6h;
     uint8_t ip_version;
 
-    ip_version = * (uint8_t*) buffer->pseudo_header;
+    ip_version = *(uint8_t*) buffer->pseudo_header;
 
     /**
      * If the list is empty at this index, create the first element
@@ -178,10 +178,7 @@ static struct tcp_reassembly_htable_element* tcp_find_hashtable(const struct ob_
         {
             case 4:
                 memcpy(&iph, buffer->pseudo_header, sizeof(struct ip_pseudo_header));
-                if (begin->source_port == source_port &&
-                begin->destination_port == destination_port &&
-                begin->ipv4.destination_ip.s_addr == iph.ip_dst.s_addr &&
-                begin->ipv4.source_ip.s_addr == iph.ip_src.s_addr)
+                if (begin->source_port == source_port && begin->destination_port == destination_port && begin->ipv4.destination_ip.s_addr == iph.ip_dst.s_addr && begin->ipv4.source_ip.s_addr == iph.ip_src.s_addr)
                 {
                     return begin;
                 }
@@ -189,10 +186,7 @@ static struct tcp_reassembly_htable_element* tcp_find_hashtable(const struct ob_
 
             case 6:
                 memcpy(&ip6h, buffer->pseudo_header, sizeof(struct ip6_pseudo_header));
-                if (begin->source_port == source_port &&
-                begin->destination_port == destination_port &&
-                memcmp(begin->ipv6.destination_ip.s6_addr16, ip6h.ip6_dst.s6_addr16, sizeof(struct in6_addr)) == 0 &&
-                memcmp(begin->ipv6.source_ip.s6_addr16, ip6h.ip6_src.s6_addr16, sizeof(struct in6_addr)) == 0)
+                if (begin->source_port == source_port && begin->destination_port == destination_port && memcmp(begin->ipv6.destination_ip.s6_addr16, ip6h.ip6_dst.s6_addr16, sizeof(struct in6_addr)) == 0 && memcmp(begin->ipv6.source_ip.s6_addr16, ip6h.ip6_src.s6_addr16, sizeof(struct in6_addr)) == 0)
                 {
                     return begin;
                 }
@@ -431,7 +425,7 @@ static void tcp_reassemble(struct ob_protocol* buffer, struct tcp_reassembly_hta
     {
         longjmp(*(buffer->catcher), OB_ERROR_MEMORY_ALLOCATION);
     }
-    
+
     /**
      * Go back to initial packet
      */
@@ -687,7 +681,7 @@ static void tcp_options_dump(const struct ob_protocol* buffer, ssize_t offset, s
                 break;
 
             case 27: /* QuickStart */
-                tcp_options_dump_quickstart(buffer, i,  Length);
+                tcp_options_dump_quickstart(buffer, i, Length);
                 break;
 
             case 28: /* User timeout */
@@ -728,8 +722,8 @@ static void tcp_dump_v3(const struct ob_protocol* buffer, struct tcphdr* th)
     ssize_t checksum_offset = offsetof(struct tcphdr, th_sum);
     uint32_t checksum;
 
-    ip_version = * (uint8_t*) buffer->pseudo_header;
-    
+    ip_version = *(uint8_t*) buffer->pseudo_header;
+
     printf("--- BEGIN TCP MESSAGE ---\n");
 
     printf("%-45s = %u (%s)\n", "Source Port", be16toh(th->th_sport), application_get_name(T_TRANSPORT_TCP, be16toh(th->th_sport)));
@@ -800,7 +794,7 @@ static void tcp_dump_v3(const struct ob_protocol* buffer, struct tcphdr* th)
         default:
             break;
     }
-    
+
     printf(" %s\n", checksum_16bitonescomplement_validate(buffer, buffer->length, be16toh(th->th_sum), true));
     printf("%-45s = %u\n", "Urgent Pointer", be16toh(th->th_urp));
 }
@@ -823,7 +817,7 @@ void tcp_dump(struct ob_protocol* buffer)
     {
         longjmp(*(buffer->catcher), OB_ERROR_BUFFER_OVERFLOW);
     }
-    
+
     memcpy(&th, buffer->hdr, sizeof(struct tcphdr));
 
     switch (buffer->verbosity_level)
@@ -853,7 +847,7 @@ void tcp_dump(struct ob_protocol* buffer)
     {
         tcp_options_dump(buffer, sizeof(struct tcphdr), header_size);
     }
-    
+
     if (header_size == buffer->length)
     {
         return;
@@ -862,7 +856,7 @@ void tcp_dump(struct ob_protocol* buffer)
     htable_element = tcp_find_hashtable(buffer, be16toh(th.th_sport), be16toh(th.th_dport));
 
     tcp_insert_fragment(buffer, header_size, (unsigned long) (buffer->length - header_size), be32toh(th.th_seq), th.th_flags & TH_SYN, th.th_flags & TH_PUSH, htable_element);
-    
+
     tcp_complete_value = tcp_is_complete(htable_element);
 
     if (tcp_complete_value == -1)

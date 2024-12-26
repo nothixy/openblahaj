@@ -12,7 +12,7 @@
 #include <netinet/icmp6.h>
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+    #include "config.h"
 #endif
 #include "network/ip.h"
 #include "network/ip6.h"
@@ -40,7 +40,7 @@ static uint8_t ipv6_dump_extension_hop_by_hop(const struct ob_protocol* buffer, 
     {
         longjmp(*(buffer->catcher), OB_ERROR_BUFFER_OVERFLOW);
     }
-    
+
     memcpy(&hbh, &hdr[offset], sizeof(struct ip6_hbh));
 
     if (nodisp)
@@ -410,7 +410,7 @@ static ssize_t ipv6_dump_extension_mobility_handover_initiate(const struct ob_pr
     {
         longjmp(*(buffer->catcher), OB_ERROR_BUFFER_OVERFLOW);
     }
-    
+
     memcpy(&hak, &hdr[offset], sizeof(struct ip6_mobi_hoi));
 
     printf("Sequence number : %u, ", be16toh(hak.ip6m_seq));
@@ -606,7 +606,7 @@ static ssize_t ipv6_dump_extension_mobility_update_notification(const struct ob_
     {
         longjmp(*(buffer->catcher), OB_ERROR_BUFFER_OVERFLOW);
     }
-    
+
     memcpy(&upn, &hdr[offset], sizeof(struct ip6_mobi_upn));
 
     printf("Sequence number : %u, ", be16toh(upn.ip6m_seq));
@@ -1050,7 +1050,7 @@ static ssize_t ipv6_dump_extension_header(const struct ob_protocol* buffer, ssiz
         {
             longjmp(*(buffer->catcher), OB_ERROR_INVALID_VALUES);
         }
-        
+
         offset += HeaderExtensionLength;
     }
 }

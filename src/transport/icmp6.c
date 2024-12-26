@@ -8,7 +8,7 @@
 #include <netinet/icmp6.h>
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+    #include "config.h"
 #endif
 #include "network/ip6.h"
 #include "generic/bytes.h"

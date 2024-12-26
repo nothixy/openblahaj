@@ -8,7 +8,7 @@
 #include <pthread.h>
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+    #include "config.h"
 #endif
 #include "generic/thread.h"
 #include "generic/protocol.h"
@@ -45,7 +45,7 @@ void print_logo(void)
         {
             printf("\033[31m");
         }
-        else if ((bytes[i] == '.' ||  bytes[i] == ':') && i > 750)
+        else if ((bytes[i] == '.' || bytes[i] == ':') && i > 750)
         {
             printf("\033[0m");
         }

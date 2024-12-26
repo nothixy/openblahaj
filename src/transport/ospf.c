@@ -5,7 +5,7 @@
 #include <arpa/inet.h>
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+    #include "config.h"
 #endif
 #include "network/ip6.h"
 #include "generic/bytes.h"
@@ -182,7 +182,7 @@ static void ospf_v3_dump_lsu(const struct ob_protocol* buffer, ssize_t offset)
 
         offset += (ssize_t) sizeof(struct ospf_v3_lsa_header);
 
-        lsa_data_length = (ssize_t) (be16toh(lsa_header.Length)  - sizeof(struct ospf_v3_lsa_header));
+        lsa_data_length = (ssize_t) (be16toh(lsa_header.Length) - sizeof(struct ospf_v3_lsa_header));
 
         if (lsa_data_length < 0)
         {
@@ -360,7 +360,7 @@ static void ospf_v2_dump_network_lsa(const struct ob_protocol* buffer, ssize_t o
         }
 
         inet_ntop(AF_INET, &hdr[offset], AttachedRouterStr, INET_ADDRSTRLEN * sizeof(char));
-        
+
         printf("%-45s = %s\n", "Attached router", AttachedRouterStr);
 
         offset += (ssize_t) sizeof(uint32_t);
@@ -435,7 +435,7 @@ static void ospf_v2_dump_as_external_lsa(const struct ob_protocol* buffer, ssize
         memcpy(&lsa_route, &hdr[offset], sizeof(struct ospf_v2_as_external_lsa_route));
 
         inet_ntop(AF_INET, &(lsa_route.ForwardingAddress), ForwardingAddressStr, INET_ADDRSTRLEN * sizeof(char));
-        
+
         printf("--- BEGIN OSPF v2 EXTERNAL LSA ROUTE ---\n");
         printf("%-45s = %u\n", "External", lsa_route.External);
         printf("%-45s = %u\n", "TOS", lsa_route.TOS);

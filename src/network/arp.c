@@ -8,7 +8,7 @@
 #include <netinet/ether.h>
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+    #include "config.h"
 #endif
 #include "link/eth.h"
 #include "network/arp.h"
@@ -236,7 +236,7 @@ static void arp_dump_v2(const struct ob_protocol* buffer, const struct arphdr* a
 
         inet_ntop(AF_INET, &ip_src, ip_src_str, INET_ADDRSTRLEN * sizeof(char));
         inet_ntop(AF_INET, &ip_dst, ip_dst_str, INET_ADDRSTRLEN * sizeof(char));
-        
+
         printf("Sender IP : %s, ", ip_src_str);
         printf("Target IP : %s\n", ip_dst_str);
     }

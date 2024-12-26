@@ -7,7 +7,7 @@
 #include <netinet/ether.h>
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+    #include "config.h"
 #endif
 #include "link/eth.h"
 #include "network/ip4.h"
@@ -169,4 +169,3 @@ void bootp_dump(struct ob_protocol* buffer)
         buffer->dump(buffer);
     }
 }
-

@@ -7,7 +7,7 @@
 #include <arpa/inet.h>
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+    #include "config.h"
 #endif
 #include "network/ip4.h"
 #include "network/ip6.h"
@@ -204,7 +204,7 @@ static uint16_t sctp_hash_element(const struct ob_protocol* buffer, uint16_t sou
     struct ip_pseudo_header iph;
     struct ip6_pseudo_header ip6h;
 
-    ip_version = * (uint8_t*) buffer->pseudo_header;
+    ip_version = *(uint8_t*) buffer->pseudo_header;
 
     switch (ip_version)
     {
@@ -254,7 +254,7 @@ static struct sctp_reassembly_htable_element* sctp_find_hashtable(const struct o
     struct ip6_pseudo_header ip6h;
     uint8_t ip_version;
 
-    ip_version = * (uint8_t*) buffer->pseudo_header;
+    ip_version = *(uint8_t*) buffer->pseudo_header;
 
     /**
      * If the list is empty at this index, create the first element
@@ -336,7 +336,6 @@ static struct sctp_reassembly_htable_element* sctp_find_hashtable(const struct o
         previous = begin;
         begin = begin->next;
     }
-
 
     /**
      * We reached the end of the list without matching, create a new element
@@ -518,7 +517,7 @@ static int sctp_complete(const struct sctp_reassembly_htable_element* htable_ele
  * @brief Reassemble a list of SCTP segments into one that will be set in a buffer
  * @param buffer Pointer to an ob_protocol structure that will NOT contain the reassembled buffer after this call
  * @param htable_element Pointer to the beginning of the linked list, obtained with sctp_find_hashtable()
- * @param grouped_data_length Pointer to the 
+ * @param grouped_data_length Pointer to the
  * @param from Index of the first segment to reassemble
  */
 static uint8_t* sctp_reassemble(const struct ob_protocol* buffer, struct sctp_reassembly_htable_element* htable_element, unsigned long* grouped_data_length, int from)
@@ -578,13 +577,13 @@ static uint8_t* sctp_reassemble(const struct ob_protocol* buffer, struct sctp_re
     {
         longjmp(*(buffer->catcher), OB_ERROR_MEMORY_ALLOCATION);
     }
-    
+
     /**
      * Go back to initial packet
      */
     current = from_packet;
 
-    /** 
+    /**
      * Copy data
      */
     if (packet_count > 1)
@@ -786,7 +785,7 @@ static void sctp_dump_parameter_incoming_ssn_reset_request(const struct ob_proto
     }
 
     printf("%-45s = %u\n", "Re-configuration request sequence number", be32toh(read_u32_unaligned(&hdr[offset])));
-    
+
     offset += (ssize_t) sizeof(uint32_t);
 
     for (ssize_t i = 0; i < StreamCount; ++i)
@@ -888,7 +887,7 @@ static ssize_t sctp_dump_parameter(const struct ob_protocol* buffer, ssize_t off
     {
         longjmp(*(buffer->catcher), OB_ERROR_BUFFER_OVERFLOW);
     }
-    
+
     memcpy(&sp, &hdr[offset], sizeof(struct sctp_parameter));
 
     offset += (ssize_t) sizeof(struct sctp_parameter);
@@ -1039,9 +1038,9 @@ static void sctp_dump_chunk_data(const struct ob_protocol* buffer, ssize_t offse
     memcpy(&sd, &hdr[offset], sizeof(struct sctp_chunk_data));
 
     length -= (ssize_t) sizeof(struct sctp_chunk_data);
-    
+
     offset += (ssize_t) sizeof(struct sctp_chunk_data);
-    
+
     printf("--- BEGIN SCTP DATA ---\n");
     printf("%-45s = %u\n", "TSN", be32toh(sd.TSN));
     printf("%-45s = %u\n", "Stream identifier", be16toh(sd.StreamID));
@@ -1166,7 +1165,7 @@ static void sctp_dump_chunk_shutdown(const struct ob_protocol* buffer, ssize_t o
     {
         longjmp(*(buffer->catcher), OB_ERROR_BUFFER_OVERFLOW);
     }
-    
+
     printf("--- BEGIN SCTP SHUTDOWN ---\n");
     printf("%-45s = %u\n", "Cumulative TSN ack", be32toh(read_u32_unaligned(&hdr[offset])));
 }
@@ -1174,7 +1173,7 @@ static void sctp_dump_chunk_shutdown(const struct ob_protocol* buffer, ssize_t o
 static void sctp_dump_chunk_cookie_echo(const struct ob_protocol* buffer, ssize_t offset, ssize_t length)
 {
     const uint8_t* hdr = buffer->hdr;
-    
+
     printf("--- BEGIN SCTP COOKIE ECHO ---\n");
     printf("%-45s = ", "Cookie");
     for (ssize_t i = offset; i < offset + length; ++i)
@@ -1198,7 +1197,7 @@ static void sctp_dump_chunk_auth(const struct ob_protocol* buffer, ssize_t offse
     memcpy(&sa, &hdr[offset], sizeof(struct sctp_chunk_auth));
 
     offset += (ssize_t) sizeof(struct sctp_chunk_auth);
-    
+
     printf("--- BEGIN SCTP AUTH ---\n");
     printf("%-45s = %u\n", "Shared key identifier", be16toh(sa.SharedKeyIdentifier));
     printf("%-45s = %u\n", "HMAC identifier", be16toh(sa.HMACIdentifier));
@@ -1224,7 +1223,7 @@ static void sctp_dump_chunk_idata(const struct ob_protocol* buffer, ssize_t offs
     memcpy(&si, &hdr[offset], sizeof(struct sctp_chunk_idata));
 
     offset += (ssize_t) sizeof(struct sctp_chunk_idata);
-    
+
     printf("--- BEGIN SCTP I-Data ---\n");
     printf("%-45s = %u\n", "TSN", be32toh(si.TSN));
     printf("%-45s = %u\n", "Stream identifier", be16toh(si.StreamID));
@@ -1449,7 +1448,6 @@ static void sctp_dump_chunks(const struct ob_protocol* buffer, ssize_t offset, u
             default:
                 return;
         }
-
 
         i += chunk_length;
     }

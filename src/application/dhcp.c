@@ -7,7 +7,7 @@
 #include <netinet/ether.h>
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+    #include "config.h"
 #endif
 #include "link/eth.h"
 #include "network/ip4.h"
@@ -753,16 +753,16 @@ static void dhcp_dump_command(const struct ob_protocol* buffer, ssize_t offset, 
     printf("%-45s = ", dhcp_get_command(command));
     switch (command)
     {
-        case 0x1: /* Subnet mask */
-        case 0x3: /* Router */
-        case 0x4: /* Time server */
-        case 0x5: /* Name server */
-        case 0x6: /* Domain server */
-        case 0x7: /* Log server */
-        case 0x8: /* Quotes server */
-        case 0x9: /* LPR server */
-        case 0xa: /* Impress server */
-        case 0xb: /* RLP server */
+        case 0x1:  /* Subnet mask */
+        case 0x3:  /* Router */
+        case 0x4:  /* Time server */
+        case 0x5:  /* Name server */
+        case 0x6:  /* Domain server */
+        case 0x7:  /* Log server */
+        case 0x8:  /* Quotes server */
+        case 0x9:  /* LPR server */
+        case 0xa:  /* Impress server */
+        case 0xb:  /* RLP server */
         case 0x10: /* Swap server */
         case 0x1c: /* Broadcast address */
         case 0x20: /* Router sollicitation address */
@@ -791,9 +791,9 @@ static void dhcp_dump_command(const struct ob_protocol* buffer, ssize_t offset, 
             dhcp_dump_ipv4s(buffer, offset, command_length);
             break;
 
-        case 0xc: /* Hostname */
-        case 0xe: /* Merit dump file */
-        case 0xf: /* Domain name */
+        case 0xc:  /* Hostname */
+        case 0xe:  /* Merit dump file */
+        case 0xf:  /* Domain name */
         case 0x11: /* Root path */
         case 0x12: /* Extensions path */
         case 0x28: /* Network information service domain */
@@ -812,8 +812,8 @@ static void dhcp_dump_command(const struct ob_protocol* buffer, ssize_t offset, 
             }
             break;
 
-        case 0x2: /* Time offset */
-        case 0xd: /* Boot file size */
+        case 0x2:  /* Time offset */
+        case 0xd:  /* Boot file size */
         case 0x18: /* Path MTU aging timeout option */
         case 0x23: /* ARP cache timeout */
         case 0x26: /* TCP keepalive interval */
@@ -880,7 +880,7 @@ static void dhcp_dump_command(const struct ob_protocol* buffer, ssize_t offset, 
             }
             printf("%u", be16toh(read_u16_unaligned(&data[offset])));
             break;
-        
+
         case 0x3d: /* Client identifier */
             printf("%s", dhcp_get_client_id(buffer, offset));
             break;
@@ -1034,7 +1034,7 @@ static void dhcp_dump_options(const struct ob_protocol* buffer)
         {
             dhcp_dump_command(buffer, i + 2, command, length);
         }
-        
+
         i += length + 2;
     }
 

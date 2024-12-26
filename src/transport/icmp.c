@@ -7,7 +7,7 @@
 #include <netinet/ip_icmp.h>
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+    #include "config.h"
 #endif
 #include "network/ip4.h"
 #include "generic/bytes.h"

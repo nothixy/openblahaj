@@ -6,7 +6,7 @@
 #include <pthread.h>
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+    #include "config.h"
 #endif
 #include "link/link.h"
 #include "generic/time.h"
@@ -293,6 +293,6 @@ void* loop_read_packets(void* args)
     {
         kill(getpid(), SIGINT);
     }
-    
+
     return NULL;
 }

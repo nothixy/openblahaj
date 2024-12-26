@@ -5,7 +5,7 @@
 #include <netinet/udp.h>
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+    #include "config.h"
 #endif
 #include "network/ip4.h"
 #include "network/ip6.h"
@@ -23,7 +23,7 @@ static void udp_dump_v3(const struct ob_protocol* buffer, const struct udphdr* u
     ssize_t checksum_offset = offsetof(struct udphdr, uh_sum);
     uint32_t checksum;
 
-    ip_version = * (uint8_t*) buffer->pseudo_header;
+    ip_version = *(uint8_t*) buffer->pseudo_header;
 
     printf("--- BEGIN UDP MESSAGE ---\n");
 
@@ -140,4 +140,3 @@ void udp_dump(struct ob_protocol* buffer)
 
     buffer->dump(buffer);
 }
-

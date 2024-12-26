@@ -9,7 +9,7 @@
 #include <pcap/pcap.h>
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+    #include "config.h"
 #endif
 #include "network/ip4.h"
 #include "generic/dash.h"
@@ -207,7 +207,7 @@ static int pcap_setup(struct dash_arguments* args, pcap_t** capture, struct pass
             fputs("[ERR] pcap_activate(): failed : permission denied, please run as root or use setcap(7)\n", stderr);
             return -1;
         }
-        
+
         if (pcap_activate_status < 0)
         {
             fprintf(stderr, "[ERR] pcap_activate(): failed: %s\n", pcap_strerror(pcap_activate_status));
@@ -265,7 +265,7 @@ static int pcap_setup(struct dash_arguments* args, pcap_t** capture, struct pass
  * @return - -1 on error
  */
 static int setup_arguments(int* argc, char** argv, struct dash_arguments* args)
-{   
+{
     /**
      * List of recognized options
      */
@@ -585,7 +585,7 @@ int main(int argc, char* argv[])
      * Set terminal raw mode
      */
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &terminal_mode);
-  
+
     pthread_create(&packet, NULL, loop_read_packets, (void*) &capture_args);
 
     if (!args.noprompt)

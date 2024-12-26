@@ -1,5 +1,5 @@
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+    #include "config.h"
 #endif
 #include "generic/bytes.h"
 
@@ -81,7 +81,7 @@ const char* checksum_16bitonescomplement_validate(const struct ob_protocol* buff
         sum += (sum >> 16);
         sum = (uint16_t) sum;
     }
-    
+
     sum = (uint16_t) (~sum);
 
     return sum == 0 ? "\033[1m[Valid]\033[22m" : "\033[1m[Invalid (this might indicate that hardware offloading was used)]\033[22m";

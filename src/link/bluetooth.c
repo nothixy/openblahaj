@@ -6,7 +6,7 @@
 #include <bluetooth/hci.h>
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+    #include "config.h"
 #endif
 #include "link/bluetooth.h"
 #include "generic/protocol.h"
@@ -174,7 +174,7 @@ static void bt_hci_iso_data_dump(const struct ob_protocol* buffer, ssize_t offse
 static void bt_dump_v3(const struct ob_protocol* buffer)
 {
     const uint8_t* hdr = buffer->hdr;
-    
+
     printf("--- BEGIN BLUETOOTH MESSAGE ---\n");
 
     printf("%-45s = %u (%s)\n", "HCI Packet Indicator", hdr[4], bt_hci_get_packet_type(hdr[4]));

@@ -4,7 +4,7 @@
 #include <string.h>
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+    #include "config.h"
 #endif
 #include "link/dbus.h"
 #include "generic/protocol.h"
@@ -144,7 +144,7 @@ void dbus_dump(struct ob_protocol* buffer)
     {
         longjmp(*(buffer->catcher), OB_ERROR_BUFFER_OVERFLOW);
     }
-    
+
     memcpy(&dh, buffer->hdr, sizeof(struct dbus_header));
 
     switch (buffer->verbosity_level)

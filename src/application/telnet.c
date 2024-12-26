@@ -3,7 +3,7 @@
 #include <stdbool.h>
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+    #include "config.h"
 #endif
 #include "generic/protocol.h"
 #include "application/telnet.h"
@@ -87,7 +87,7 @@ static void telnet_display_option(const struct ob_protocol* buffer, ssize_t offs
         case 16:
             printf("Output linefeed disposition");
             break;
-            
+
         case 17:
             printf("Extended ASCII");
             break;
