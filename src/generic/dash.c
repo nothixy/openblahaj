@@ -16,6 +16,9 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
     #include <windows.h>
 #endif
 
+#ifdef HAVE_CONFIG_H
+    #include "config.h"
+#endif
 #include "generic/dash.h"
 
 enum COLORS {

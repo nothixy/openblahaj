@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <stddef.h>
 
+#ifdef HAVE_CONFIG_H
+    #include "config.h"
+#endif
 #include "generic/time.h"
 
 /**
