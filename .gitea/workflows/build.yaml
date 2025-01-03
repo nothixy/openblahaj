@@ -1,0 +1,24 @@
+name: Build on Alpine
+run-name: Try building openBLÅHAJ on Alpine Linux
+on: [push]
+
+jobs:
+  build:
+    runs-on: alpine
+    container:
+      image: docker.io/library/alpine:latest
+    steps:
+      - name: Install dependencies
+        run: apk add make libpcap-dev libpcap bluez-dev gcc g++ automake autoconf autoconf-archive doxygen graphviz tini libcap-setcap
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Build openBLÅHAJ
+        run: |
+          cd ${{ gitea.workspace }}
+          autoreconf -ivf
+          mkdir -p build
+          cd build
+          ../configure --enable-dbus --enable-bluetooth
+          make -j
+      - name: Run tests
+        run: make check
