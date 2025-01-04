@@ -22,5 +22,5 @@ jobs:
           make -j
       - name: Run tests
         run: |
-        cd ${{ gitea.workspace }}/build
-        make check
+          cd ${{ gitea.workspace }}/build
+          make check
