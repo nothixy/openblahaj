@@ -78,7 +78,7 @@ static void mqtt_dump_publish(struct ob_protocol* buffer, struct mqtt_header* mh
     if (property_length_bytes != 0)
     {
         # warning THIS IS INVALID
-        offset += property_length_bytes + property_length;
+        offset += property_length_bytes + (ssize_t) property_length;
     }
     else
     {
@@ -91,7 +91,7 @@ static void mqtt_dump_publish(struct ob_protocol* buffer, struct mqtt_header* mh
     printf("%-45s = ", "Topic");
     for (uint64_t i = 0; i < topic_name_length; ++i)
     {
-        printf("%c", hdr[offset + topic_name_length_bytes + i]);
+        printf("%c", hdr[offset + topic_name_length_bytes + (ssize_t) i]);
     }
     printf("\n");
 
@@ -108,12 +108,12 @@ static void mqtt_dump_publish(struct ob_protocol* buffer, struct mqtt_header* mh
         // fprintf(stderr, "HAS CTRL PACKET\n");
     }
 
-    printf("%-45s = %u\n", "Packet identifier", be16toh(read_u16_unaligned(&hdr[offset + topic_name_length + topic_name_length_bytes])));
+    printf("%-45s = %u\n", "Packet identifier", be16toh(read_u16_unaligned(&hdr[offset + (ssize_t) topic_name_length + topic_name_length_bytes])));
 
     printf("%-45s = ", "Payload");
-    for (ssize_t i = 0; i < length - topic_name_length - topic_name_length_bytes - property_length - property_length_bytes - sizeof(uint16_t); ++i)
+    for (ssize_t i = 0; i < length - (ssize_t) topic_name_length - topic_name_length_bytes - (ssize_t) property_length - property_length_bytes - (ssize_t) sizeof(uint16_t); ++i)
     {
-        printf("%02x", hdr[offset + topic_name_length + topic_name_length_bytes + sizeof(uint16_t)]);
+        printf("%02x", hdr[offset + (ssize_t) topic_name_length + topic_name_length_bytes + (ssize_t) sizeof(uint16_t)]);
     }
     printf("\n");
 }
@@ -131,7 +131,10 @@ static void mqtt_dump_v3(struct ob_protocol* buffer, struct mqtt_header* mh)
     switch (mh->type)
     {
         case 3:
-            mqtt_dump_publish(buffer, mh, length_bytes + offsetof(struct mqtt_header, length), length);
+            mqtt_dump_publish(buffer, mh, length_bytes + (ssize_t) offsetof(struct mqtt_header, length), (ssize_t) length);
+
+        default:
+            break;
     }
 }
 
