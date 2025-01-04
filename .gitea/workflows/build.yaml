@@ -21,4 +21,6 @@ jobs:
           ../configure --enable-dbus --enable-bluetooth
           make -j
       - name: Run tests
-        run: make check
+        run: |
+        cd ${{ gitea.workspace }}/build
+        make check
