@@ -111,7 +111,7 @@ AC_CONFIG_FILES([Makefile
 AC_CONFIG_FILES([tests/commandline1.ftest], [chmod +x tests/commandline1.ftest])
 AC_CONFIG_FILES([tests/commandline2.stest], [chmod +x tests/commandline2.stest])
 AC_CONFIG_FILES([tests/capture.test], [chmod +x tests/capture.test])
-AC_CONFIG_FILES([tests/empty.cap], [chmod +x tests/empty.cap])
+AC_CONFIG_LINKS([tests/empty.cap:tests/empty.cap])
 
 DX_PS_FEATURE(OFF)
 DX_PDF_FEATURE(OFF)
