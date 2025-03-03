@@ -1,7 +1,5 @@
 # openBLÅHAJ
 
-![build](https://git.hixy.tk/nothixy/openblahaj/actions/workflows/build.yaml/badge.svg)
-
 ```
                                  :                          
                                 +++                          
