@@ -33,16 +33,13 @@
 /* Define to 1 if the system has the type '_Bool'. */
 #undef HAVE__BOOL
 
-/* Define if debugging is disabled */
-#undef NDEBUG
-
-/* Build bluetooth support */
+/* Build bluetooth support */
 #undef OB_BUILD_BLUETOOTH
 
-/* Build dbus support */
+/* Build dbus support */
 #undef OB_BUILD_DBUS
 
-/* Create a static build */
+/* Create a static build */
 #undef OB_BUILD_STATIC
 
 /* Name of package */
