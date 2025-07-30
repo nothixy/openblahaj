@@ -24,6 +24,7 @@
  * @param args Pointer to a dash_arguments structure
  * @return - -1 on error
  * @return - 0 on sucess
+ * @return - 2 on interfaces listed but user was not allowed to select
  */
 static int pcap_setup_interface(struct dash_arguments* args)
 {
@@ -33,6 +34,8 @@ static int pcap_setup_interface(struct dash_arguments* args)
     int interface_count = 0;
     int interface_index = -1;
     char errbuf[PCAP_ERRBUF_SIZE];
+
+    int return_code = 0;
 
     sigset_t signals;
 
@@ -52,27 +55,40 @@ static int pcap_setup_interface(struct dash_arguments* args)
      */
     do
     {
-        printf("%-3d: %s", interface_count + 1, devsp_copy->name);
-        if (devsp_copy->description != NULL)
+        if (!args->list_interfaces)
         {
-            printf(" [%s]", devsp_copy->description);
-        }
+            printf("%-3d: %s", interface_count + 1, devsp_copy->name);
+            if (devsp_copy->description != NULL)
+            {
+                printf(" [%s]", devsp_copy->description);
+            }
 #ifndef OB_BUILD_BLUETOOTH
-        if (!strncmp(devsp_copy->name, "bluetooth", 9))
-        {
-            printf(" (Probably unsupported)");
-        }
+            if (!strncmp(devsp_copy->name, "bluetooth", 9))
+            {
+                printf(" (Probably unsupported)");
+            }
 #endif
 #ifndef OB_BUILD_DBUS
-        if (!strncmp(devsp_copy->name, "dbus", 4))
-        {
-            printf(" (Probably unsupported)");
-        }
+            if (!strncmp(devsp_copy->name, "dbus", 4))
+            {
+                printf(" (Probably unsupported)");
+            }
 #endif
+        }
+        else
+        {
+            printf("%s", devsp_copy->name);
+        }
         printf("\n");
         ++interface_count;
     }
     while ((devsp_copy = devsp_copy->next) != NULL);
+
+    if (args->list_interfaces)
+    {
+        return_code = 2;
+        goto PCAP_SETUP_INTERFACE_END;
+    }
 
     if (interface_count == 0)
     {
@@ -126,9 +142,10 @@ static int pcap_setup_interface(struct dash_arguments* args)
 
     strcpy(args->interface, devsp_copy->name);
 
+PCAP_SETUP_INTERFACE_END:
     pcap_freealldevs(devsp);
 
-    return 0;
+    return return_code;
 }
 
 /**
@@ -144,6 +161,7 @@ static int pcap_setup(struct dash_arguments* args, pcap_t** capture, struct pass
     bpf_u_int32 netaddr;
     int pcap_activate_status;
     struct bpf_program fp;
+    int return_code = 0;
 
     capture_args->can_use_bpf = true;
 
@@ -167,9 +185,9 @@ static int pcap_setup(struct dash_arguments* args, pcap_t** capture, struct pass
      */
     if (args->interface == NULL)
     {
-        if (pcap_setup_interface(args))
+        if ((return_code = pcap_setup_interface(args)) != 0)
         {
-            return -1;
+            return return_code;
         }
     }
 
@@ -319,6 +337,12 @@ static int setup_arguments(int* argc, char** argv, struct dash_arguments* args)
             .description = "Read at most $ packets"
         },
         {
+            .user_pointer = &(args->display_hostnames),
+            .opt_name = 'H',
+            .longopt_name = "hostnames",
+            .description = "Display hostnames associated to IP addresses"
+        },
+        {
             .user_pointer = &(args->nocolor),
             .longopt_name = "nocolor",
             .description = "Don't print ascii color codes on console"
@@ -326,11 +350,16 @@ static int setup_arguments(int* argc, char** argv, struct dash_arguments* args)
         {
             .user_pointer = &(args->noprompt),
             .longopt_name = "noprompt",
-            .description = "Don't display a prompt at the bottom of the script"
+            .description = "Don't display a prompt at the bottom of the scren"
+        },
+        {
+            .user_pointer = &(args->list_interfaces),
+            .longopt_name = "list-interfaces",
+            .description = "List interfaces that " OB_TITLE " can listen on"
         },
         {
             .user_pointer = &(args->display_version),
-            .opt_name = 'v',
+            .opt_name = 'V',
             .longopt_name = "version",
             .description = "Show version"
         },
@@ -457,9 +486,12 @@ int main(int argc, char* argv[])
         .bpf_filter = NULL,
         .verbosity_level = NULL,
         .max_packet_count = NULL,
+        .save_file = NULL,
         .nocolor = false,
         .noprompt = false,
-        .display_help = false
+        .display_help = false,
+        .display_version = false,
+        .display_hostnames = false
     };
 
     struct passed_message capture_args = {
@@ -474,7 +506,8 @@ int main(int argc, char* argv[])
         .capture = NULL,
         .save = NULL,
         .console = &console,
-        .cli = &args
+        .cli = &args,
+        .display_hostnames = false
     };
 
     char errbuf[PCAP_ERRBUF_SIZE];
@@ -499,9 +532,6 @@ int main(int argc, char* argv[])
 
     pthread_mutex_lock(capture_args.console);
 
-    print_logo();
-    set_title("%s", OB_NAME " - starting up");
-
     srand((unsigned int) time(NULL));
 
     /**
@@ -516,6 +546,12 @@ int main(int argc, char* argv[])
     {
         return_code = EXIT_SUCCESS;
         goto END;
+    }
+
+    if (!args.list_interfaces)
+    {
+        print_logo();
+        set_title("%s", OB_NAME " - starting up");
     }
 
     if (args.verbosity_level)
@@ -574,12 +610,18 @@ int main(int argc, char* argv[])
         fprintf(stderr, "[ERR] pcap_setup() failed\n");
         goto END;
     }
+    if (pcap_setup_return > 1)
+    {
+        return_code = EXIT_SUCCESS;
+        goto END;
+    }
 
     capture_args.capture = capture;
     capture_args.verbosity_level = (uint8_t) verbosity_level;
     capture_args.nocolor = args.nocolor;
     capture_args.noprompt = args.noprompt;
     capture_args.min_read = pcap_setup_return;
+    capture_args.display_hostnames = args.display_hostnames;
 
     /**
      * Set terminal raw mode
@@ -632,7 +674,7 @@ END:
      * Magic sequence to reset terminal encoding
      * https://www.in-ulm.de/~mascheck/various/alternate_charset/#solution
      */
-    if (!capture_args.nocolor)
+    if (!capture_args.nocolor && !args.list_interfaces)
     {
         printf("\033[0m\033(B\033)0\017\033[?5l\0337\033[0;0r\0338");
     }

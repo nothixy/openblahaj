@@ -1,13 +1,10 @@
 #include <stdio.h>
 #include <stddef.h>
-#include <stdlib.h>
 #include <string.h>
 
 #ifdef HAVE_CONFIG_H
     #include "config.h"
 #endif
-#include "network/ip4.h"
-#include "network/ip6.h"
 #include "generic/bytes.h"
 #include "application/mqtt.h"
 
@@ -185,6 +182,6 @@ void mqtt_dump(struct ob_protocol* buffer)
         }
 
         buffer->hdr = &hdr[packet_length + 2];
-        buffer->length -= (packet_length + 2);
+        buffer->length -= (ssize_t) (packet_length + 2);
     }
 }

@@ -16,6 +16,8 @@ struct dash_arguments {
     bool nocolor;
     bool noprompt;
     bool display_version;
+    bool display_hostnames;
+    bool list_interfaces;
 };
 
 struct passed_message {
@@ -31,6 +33,7 @@ struct passed_message {
     bool can_use_bpf;
     bool nocolor;
     bool noprompt;
+    bool display_hostnames;
     uint8_t verbosity_level;
     char input_buffer[_POSIX_MAX_CANON];
 };

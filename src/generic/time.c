@@ -12,14 +12,18 @@
  * @param tv Pointer to the timeval passed by pcap_dispatch()
  * @param buf Char array of at least 111 characters
  */
-char* get_timestamp_utc(const struct timeval* tv, char* buf)
+char* get_timestamp_utc(const struct timeval* tv, char* buf, bool usec)
 {
-    struct tm* tm;
+    struct tm* tm = NULL;
     size_t written;
 
     tm = gmtime(&tv->tv_sec);
-    written = strftime(buf, 100, "%Y-%m-%dT%H:%M:%S.", tm);
-    sprintf(&buf[written], "%09luZ", tv->tv_usec);
+    written = strftime(buf, 100, "%Y-%m-%dT%H:%M:%S", tm);
+
+    if (usec)
+    {
+        sprintf(&buf[written], ".%09luZ", tv->tv_usec);
+    }
 
     return buf;
 }

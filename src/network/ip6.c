@@ -1,3 +1,4 @@
+#include <netdb.h>
 #include <stdio.h>
 #include <endian.h>
 #include <stddef.h>
@@ -1055,7 +1056,7 @@ static ssize_t ipv6_dump_extension_header(const struct ob_protocol* buffer, ssiz
     }
 }
 
-static void ipv6_dump_v3(const struct ip6_hdr* ipv6)
+static void ipv6_dump_v3(const struct ip6_hdr* ipv6, bool display_hostnames)
 {
     uint8_t Version;
     uint8_t TrafficClass;
@@ -1064,6 +1065,19 @@ static void ipv6_dump_v3(const struct ip6_hdr* ipv6)
 
     char ip_source[INET6_ADDRSTRLEN] = {0};
     char ip_dest[INET6_ADDRSTRLEN] = {0};
+
+    struct sockaddr_in6 addr_src = {
+        .sin6_family = AF_INET6,
+        .sin6_addr = ipv6->ip6_src
+    };
+
+    struct sockaddr_in6 addr_dst = {
+        .sin6_family = AF_INET6,
+        .sin6_addr = ipv6->ip6_src
+    };
+
+    char host_src[NI_MAXHOST] = {0};
+    char host_dst[NI_MAXHOST] = {0};
 
     inet_ntop(AF_INET6, &(ipv6->ip6_src), ip_source, INET6_ADDRSTRLEN * sizeof(char));
     inet_ntop(AF_INET6, &(ipv6->ip6_dst), ip_dest, INET6_ADDRSTRLEN * sizeof(char));
@@ -1081,8 +1095,22 @@ static void ipv6_dump_v3(const struct ip6_hdr* ipv6)
     printf("%-45s = 0x%x\n", "Flow Label", FlowLabel);
     printf("%-45s = %u\n", "Length", be16toh(ipv6->ip6_plen));
     printf("%-45s = %u\n", "Hop Limit", ipv6->ip6_hlim);
-    printf("%-45s = %s\n", "Source", ip_source);
-    printf("%-45s = %s\n", "Destination", ip_dest);
+    if (display_hostnames && getnameinfo((struct sockaddr*) &addr_src, sizeof(struct sockaddr_in6), host_src, NI_MAXHOST, NULL, 0, NI_NAMEREQD) == 0)
+    {
+        printf("%-45s = %s \033[1m[%s]\033[22m\n", "Source", ip_source, host_src);
+    }
+    else
+    {
+        printf("%-45s = %s\n", "Source", ip_source);
+    }
+    if (display_hostnames && getnameinfo((struct sockaddr*) &addr_dst, sizeof(struct sockaddr_in6), host_dst, NI_MAXHOST, NULL, 0, NI_NAMEREQD) == 0)
+    {
+        printf("%-45s = %s \033[1m[%s]\033[22m\n", "Destination", ip_dest, host_dst);
+    }
+    else
+    {
+        printf("%-45s = %s\n", "Destination", ip_dest);
+    }
 }
 
 static void ipv6_dump_v2(const struct ip6_hdr* ipv6)
@@ -1125,7 +1153,7 @@ void ipv6_dump(struct ob_protocol* buffer)
 
         case OB_VERBOSITY_LEVEL_HIGH:
         default:
-            ipv6_dump_v3(&ipv6);
+            ipv6_dump_v3(&ipv6, buffer->display_hostnames);
             break;
     }
 

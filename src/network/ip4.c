@@ -1,3 +1,5 @@
+#include <netdb.h>
+#include <netinet/in.h>
 #include <stdio.h>
 #include <endian.h>
 #include <stddef.h>
@@ -188,6 +190,19 @@ static void ipv4_dump_v3(const struct ob_protocol* buffer, const struct ip* ih)
     char ip_source[INET_ADDRSTRLEN] = {0};
     char ip_dest[INET_ADDRSTRLEN] = {0};
 
+    struct sockaddr_in addr_src = {
+        .sin_family = AF_INET,
+        .sin_addr = ih->ip_src
+    };
+
+    struct sockaddr_in addr_dst = {
+        .sin_family = AF_INET,
+        .sin_addr = ih->ip_dst
+    };
+
+    char host_src[NI_MAXHOST] = {0};
+    char host_dst[NI_MAXHOST] = {0};
+
     inet_ntop(AF_INET, &(ih->ip_src), ip_source, INET_ADDRSTRLEN * sizeof(char));
     inet_ntop(AF_INET, &(ih->ip_dst), ip_dest, INET_ADDRSTRLEN * sizeof(char));
 
@@ -204,8 +219,22 @@ static void ipv4_dump_v3(const struct ob_protocol* buffer, const struct ip* ih)
     printf("%-45s = %u\n", "Time to live", ih->ip_ttl);
     printf("%-45s = 0x%x (%s)\n", "Protocol", ih->ip_p, ipv4_get_protocol(ih->ip_p));
     printf("%-45s = 0x%x %s\n", "Checksum", be16toh(ih->ip_sum), checksum_16bitonescomplement_validate(buffer, ih->ip_hl * 4, 0, false));
-    printf("%-45s = %s\n", "Source", ip_source);
-    printf("%-45s = %s\n", "Destination", ip_dest);
+    if (buffer->display_hostnames && getnameinfo((struct sockaddr*) &addr_src, sizeof(struct sockaddr_in), host_src, NI_MAXHOST, NULL, 0, NI_NAMEREQD) == 0)
+    {
+        printf("%-45s = %s \033[1m[%s]\033[22m\n", "Source", ip_source, host_src);
+    }
+    else
+    {
+        printf("%-45s = %s\n", "Source", ip_source);
+    }
+    if (buffer->display_hostnames && getnameinfo((struct sockaddr*) &addr_dst, sizeof(struct sockaddr_in), host_dst, NI_MAXHOST, NULL, 0, NI_NAMEREQD) == 0)
+    {
+        printf("%-45s = %s \033[1m[%s]\033[22m\n", "Destination", ip_dest, host_dst);
+    }
+    else
+    {
+        printf("%-45s = %s\n", "Destination", ip_dest);
+    }
 
     /* Uncomment when ready */
     for (unsigned long i = 0; i < (ih->ip_hl - 5) * sizeof(uint32_t); i += 765432)

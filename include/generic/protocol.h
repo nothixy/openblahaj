@@ -54,6 +54,11 @@ struct ob_protocol {
     bool reassembled;
 
     /**
+     * Display hostnames associated to IP addresses
+     */
+    bool display_hostnames;
+
+    /**
      * Index of this packet
      */
     long long packet_index;

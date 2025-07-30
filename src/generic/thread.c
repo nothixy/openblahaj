@@ -1,4 +1,3 @@
-#include <time.h>
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
@@ -103,6 +102,7 @@ void read_message(unsigned char* capture_args, const struct pcap_pkthdr* header,
         .reassembled = false,
         .packet_index = args->read_packet_count + 1,
         .catcher = &catcher,
+        .display_hostnames = args->display_hostnames
     };
 
     args->read_packet_count += 1;
@@ -183,7 +183,7 @@ void read_message(unsigned char* capture_args, const struct pcap_pkthdr* header,
     if (args->verbosity_level == OB_VERBOSITY_LEVEL_HIGH)
     {
         char timestamp[150];
-        printf("%-45s = %s\n", "Time", get_timestamp_utc(&header->ts, timestamp));
+        printf("%-45s = %s\n", "Time", get_timestamp_utc(&header->ts, timestamp, true));
     }
 
     if (buffer.length > 0)

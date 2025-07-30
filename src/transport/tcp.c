@@ -565,7 +565,7 @@ static void tcp_options_dump_timestamp(const struct ob_protocol* buffer, ssize_t
     timestamp.tv_usec = 0;
     echo.tv_sec = echo_sec;
     echo.tv_usec = 0;
-    printf(" = %s / %s\n", get_timestamp_utc(&timestamp, timestamp_str), get_timestamp_utc(&echo, echo_str));
+    printf(" = %s / %s\n", get_timestamp_utc(&timestamp, timestamp_str, true), get_timestamp_utc(&echo, echo_str, true));
 }
 
 static void tcp_options_dump_quickstart(const struct ob_protocol* buffer, ssize_t offset, uint8_t Length)
