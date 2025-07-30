@@ -33,6 +33,9 @@
 /* Define to 1 if the system has the type '_Bool'. */
 #undef HAVE__BOOL
 
+/* Define if debugging is disabled */
+#undef NDEBUG
+
 /* Build bluetooth support */
 #undef OB_BUILD_BLUETOOTH
 

@@ -3,9 +3,9 @@
 
 AC_PREREQ([2.72])
 AC_INIT(
-	[openBLAHAJ],
-	[1.0.0],
-	[valentin.foulon@etu.unistra.fr]
+    [openBLAHAJ],
+    [1.0.0],
+    [fl.valentin1904@gmail.com]
 )
 AM_SILENT_RULES([yes])
 AC_CONFIG_SRCDIR([build-aux/config.h.in])
