@@ -9,7 +9,7 @@ jobs:
       image: docker.io/library/alpine:latest
     steps:
       - name: Install dependencies
-        run: apk add make libpcap-dev libpcap bluez-dev gcc g++ automake autoconf autoconf-archive doxygen graphviz tini libcap-setcap nodejs git
+        run: apk add make libpcap-dev libpcap bluez-dev gcc g++ automake autoconf autoconf-archive doxygen graphviz tini libcap-setcap nodejs git libtool
       - name: Check out repository code
         uses: actions/checkout@v4
       - name: Build openBLÅHAJ
