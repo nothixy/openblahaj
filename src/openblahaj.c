@@ -414,7 +414,7 @@ static int setup_arguments(int* argc, char** argv, struct dash_arguments* args)
     if (args->display_version)
     {
         printf("%s - version %s\n", OB_TITLE, OB_VERSION);
-        return -1;
+        return 1;
     }
 
     return 0;
@@ -552,6 +552,7 @@ END:
  * @param capture_args Options of this capture session
  * @return - EXIT_SUCCESS on success
  * @return - EXIT_FAILURE on error
+ * @return - -1 on stop with success
  * @note This should only be called from the openBLAHAJ executable
  */
 static int ob_setup_args_and_pcap(int* argc, char** argv[], struct dash_arguments* args, struct passed_message* capture_args)
@@ -574,7 +575,7 @@ static int ob_setup_args_and_pcap(int* argc, char** argv[], struct dash_argument
 
         if (argument_setup_return > 0)
         {
-            return_code = EXIT_SUCCESS;
+            return_code = -1;
             goto END;
         }
     }
@@ -738,6 +739,10 @@ int ob_main(int argc, char* argv[])
     return_code = ob_setup_args_and_pcap(&argc, &argv, &args, &capture_args);
     if (return_code)
     {
+        if (return_code == -1)
+        {
+            return_code = 0;
+        }
         goto PROGRAM_END;
     }
 
