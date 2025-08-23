@@ -666,6 +666,7 @@ int ob_main(int argc, char* argv[])
     sigset_t block_sigusr1;
     int received_signal;
     int pcap_setup_return;
+    int ob_setup_return;
 
     pthread_t packet;
     pthread_t input = 0;
@@ -736,10 +737,10 @@ int ob_main(int argc, char* argv[])
 
     srand((unsigned int) time(NULL));
 
-    return_code = ob_setup_args_and_pcap(&argc, &argv, &args, &capture_args);
-    if (return_code)
+    ob_setup_return = ob_setup_args_and_pcap(&argc, &argv, &args, &capture_args);
+    if (ob_setup_return)
     {
-        if (return_code == -1)
+        if (ob_setup_return == -1)
         {
             return_code = 0;
         }
