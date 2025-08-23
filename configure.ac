@@ -14,7 +14,6 @@ AC_CONFIG_AUX_DIR([build-aux])
 AC_REQUIRE_AUX_FILE([tap-driver.sh])
 AM_INIT_AUTOMAKE([subdir-objects foreign -Wall])
 
-
 AX_CHECK_ENABLE_DEBUG(
 	[no],
 	[DEBUG],
@@ -75,9 +74,54 @@ AC_ARG_ENABLE(
 	[dbus=false]
 )
 
+AC_ARG_WITH(
+	hook-openssl,
+	[AS_HELP_STRING(
+		[--with-hook-openssl],
+		[compile with openssl hooked functions]
+	)],
+	[case "${withval}" in
+		yes) openssl=true;;
+		no) openssl=false;;
+		*) AC_MSG_ERROR([bad value ${withval} for --with-hook-openssl]);;
+	esac],
+	[openssl=false]
+)
+
+AC_ARG_WITH(
+	hook-quiche,
+	[AS_HELP_STRING(
+		[--with-hook-quiche],
+		[compile with quiche hooked functions]
+	)],
+	[case "${withval}" in
+		yes) quiche=true;;
+		no) quiche=false;;
+		*) AC_MSG_ERROR([bad value ${withval} for --with-hook-quiche]);;
+	esac],
+	[quiche=false]
+)
+
+AC_ARG_WITH(
+	hook-nspr,
+	[AS_HELP_STRING(
+		[--with-hook-nspr],
+		[compile with nspr hooked functions]
+	)],
+	[case "${withval}" in
+		yes) nspr=true;;
+		no) nspr=false;;
+		*) AC_MSG_ERROR([bad value ${withval} for --with-hook-nspr]);;
+	esac],
+	[nspr=false]
+)
+
 AM_CONDITIONAL([STATIC_RELEASE], [test x$static = xtrue])
 AM_CONDITIONAL([BUILD_BLUETOOTH], [test x$bluetooth = xtrue])
 AM_CONDITIONAL([BUILD_DBUS], [test x$dbus = xtrue])
+AM_CONDITIONAL([BUILD_OPENSSL], [test x$openssl = xtrue])
+AM_CONDITIONAL([BUILD_QUICHE], [test x$quiche = xtrue])
+AM_CONDITIONAL([BUILD_NSPR], [test x$nspr = xtrue])
 
 # Checks for programs.
 AC_PROG_CXX

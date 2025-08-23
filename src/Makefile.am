@@ -20,6 +20,24 @@ else
 DBUS_SOURCE =
 endif
 
+if BUILD_OPENSSL
+OPENSSL_SOURCE = hooks/openssl.c
+else
+OPENSSL_SOURCE =
+endif
+
+if BUILD_QUICHE
+QUICHE_SOURCE = hooks/quiche.c
+else
+QUICHE_SOURCE =
+endif
+
+if BUILD_NSPR
+NSPR_SOURCE = hooks/nspr.c
+else
+NSPR_SOURCE =
+endif
+
 LIBRARY_SOURCES = \
 transport/transport.c \
 transport/ospf.c \
@@ -71,10 +89,10 @@ generic/time.c \
 generic/thread.c \
 openblahaj.c \
 hooks/socket.c \
-hooks/openssl.c \
-hooks/quiche.c \
-hooks/nss.c \
 hooks/printbuf.c \
+$(OPENSSL_SOURCE) \
+$(QUICHE_SOURCE) \
+$(NSPR_SOURCE) \
 $(BT_SOURCE) \
 $(DBUS_SOURCE)
 

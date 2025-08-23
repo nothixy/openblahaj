@@ -749,6 +749,12 @@ CPPFLAGS
 LDFLAGS
 CXXFLAGS
 CXX
+BUILD_NSPR_FALSE
+BUILD_NSPR_TRUE
+BUILD_QUICHE_FALSE
+BUILD_QUICHE_TRUE
+BUILD_OPENSSL_FALSE
+BUILD_OPENSSL_TRUE
 BUILD_DBUS_FALSE
 BUILD_DBUS_TRUE
 BUILD_BLUETOOTH_FALSE
@@ -835,6 +841,9 @@ enable_debug
 enable_static
 enable_bluetooth
 enable_dbus
+with_hook_openssl
+with_hook_quiche
+with_hook_nspr
 enable_dependency_tracking
 enable_shared
 enable_pic
@@ -1533,6 +1542,9 @@ Optional Features:
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+  --with-hook-openssl     compile with openssl hooked functions
+  --with-hook-quiche      compile with quiche hooked functions
+  --with-hook-nspr        compile with nspr hooked functions
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
   --with-sysroot[=DIR]    Search for dependent libraries within DIR (or the
                           compiler's sysroot if not specified).
@@ -3795,7 +3807,6 @@ fi
 
 
 
-
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to enable debugging" >&5
 printf %s "checking whether to enable debugging... " >&6; }
 
@@ -3952,6 +3963,54 @@ esac
 fi
 
 
+
+# Check whether --with-hook-openssl was given.
+if test ${with_hook_openssl+y}
+then :
+  withval=$with_hook_openssl; case "${withval}" in
+		yes) openssl=true;;
+		no) openssl=false;;
+		*) as_fn_error $? "bad value ${withval} for --with-hook-openssl" "$LINENO" 5;;
+	esac
+else case e in #(
+  e) openssl=false
+ ;;
+esac
+fi
+
+
+
+# Check whether --with-hook-quiche was given.
+if test ${with_hook_quiche+y}
+then :
+  withval=$with_hook_quiche; case "${withval}" in
+		yes) quiche=true;;
+		no) quiche=false;;
+		*) as_fn_error $? "bad value ${withval} for --with-hook-quiche" "$LINENO" 5;;
+	esac
+else case e in #(
+  e) quiche=false
+ ;;
+esac
+fi
+
+
+
+# Check whether --with-hook-nspr was given.
+if test ${with_hook_nspr+y}
+then :
+  withval=$with_hook_nspr; case "${withval}" in
+		yes) nspr=true;;
+		no) nspr=false;;
+		*) as_fn_error $? "bad value ${withval} for --with-hook-nspr" "$LINENO" 5;;
+	esac
+else case e in #(
+  e) nspr=false
+ ;;
+esac
+fi
+
+
  if test x$static = xtrue; then
   STATIC_RELEASE_TRUE=
   STATIC_RELEASE_FALSE='#'
@@ -3974,6 +4033,30 @@ fi
 else
   BUILD_DBUS_TRUE='#'
   BUILD_DBUS_FALSE=
+fi
+
+ if test x$openssl = xtrue; then
+  BUILD_OPENSSL_TRUE=
+  BUILD_OPENSSL_FALSE='#'
+else
+  BUILD_OPENSSL_TRUE='#'
+  BUILD_OPENSSL_FALSE=
+fi
+
+ if test x$quiche = xtrue; then
+  BUILD_QUICHE_TRUE=
+  BUILD_QUICHE_FALSE='#'
+else
+  BUILD_QUICHE_TRUE='#'
+  BUILD_QUICHE_FALSE=
+fi
+
+ if test x$nspr = xtrue; then
+  BUILD_NSPR_TRUE=
+  BUILD_NSPR_FALSE='#'
+else
+  BUILD_NSPR_TRUE='#'
+  BUILD_NSPR_FALSE=
 fi
 
 
@@ -21447,6 +21530,18 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_DBUS_TRUE}" && test -z "${BUILD_DBUS_FALSE}"; then
   as_fn_error $? "conditional \"BUILD_DBUS\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUILD_OPENSSL_TRUE}" && test -z "${BUILD_OPENSSL_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_OPENSSL\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUILD_QUICHE_TRUE}" && test -z "${BUILD_QUICHE_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_QUICHE\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUILD_NSPR_TRUE}" && test -z "${BUILD_NSPR_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_NSPR\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${AMDEP_TRUE}" && test -z "${AMDEP_FALSE}"; then
