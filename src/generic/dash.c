@@ -8,7 +8,6 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -413,7 +412,7 @@ static int assign_shortopt(char argument, const dash_Longopt* options, int struc
     return -1;
 }
 
-bool dash_arg_parser(int* argc, char* argv[], dash_Longopt* options)
+bool dash_arg_parser(int* argc, char* argv[], dash_Longopt* options, bool non_arg_end_parse)
 {
     int argument_non_option_index = 1;
     int argument_non_option_count = 1;
@@ -542,6 +541,11 @@ bool dash_arg_parser(int* argc, char* argv[], dash_Longopt* options)
         // Check if argument begins with a dash or a plus
         if (argv[i][0] != '-' && argv[i][0] != '+')
         {
+            if (non_arg_end_parse)
+            {
+                argument_non_option_count += *argc - i;
+                goto REORGANIZE;
+            }
             argument_non_option_count += 1;
             continue;
         }
@@ -653,7 +657,6 @@ bool dash_arg_parser(int* argc, char* argv[], dash_Longopt* options)
     }
 
 REORGANIZE:
-
     if (found_structure_index != -1 && options[found_structure_index].param_optional && options[found_structure_index].param_name != NULL && !long_opt_was_provided_with_equal)
     {
         if (*((char**) options[found_structure_index].user_pointer) != NULL)

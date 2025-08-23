@@ -68,6 +68,8 @@ Note that many protocols are incomplete, for example DHCP and IPv6 which specify
 
 openBLÅHAJ should be able to display any packet from the aforementioned list with the assumption that the packets are well formed. If a packet is invalid, it might break the program in rare cases.
 
+It should run on any modern Linux platform (tested on Ubuntu 25.10 / Linux 6.6.87.2) and any architecture.
+
 ## License
 
 This project is released under the MIT license - check the [LICENSE.txt](LICENSE.txt) file for details.
@@ -78,10 +80,6 @@ This project is released under the MIT license - check the [LICENSE.txt](LICENSE
 - **dash** - For parsing command-line arguments, released under the MIT license, check the [LICENSE.txt](LICENSE.txt) file for details
 
 ## Building
-
-In both cases the executable will be in the build directory with the name openBLAHAJ.
-
-### Method 1 (preferred)
 
 ---
 
@@ -98,25 +96,32 @@ The openBLÅHAJ executable should now be available in your build directory. The 
 6. `make doxygen-doc` (to generate html documentation)
 7. `sudo make install` (to install in default prefix with the CAP_NET_RAW capability, so that you can run openBLÅHAJ without root privileges)
 
-### Method 2
-
----
-Just run `make` in the top-level directory, the binary file will be available in the build folder
-
 ## Documentation
 
-If you followed [Method 1](#method-1-preferred), you can run make doxygen-doc to generate HTML documentation inside the build/doc/html directory
+You can run `make doxygen-doc` to generate HTML documentation inside the build/doc/html directory
 
 ## Running
 
-openBLÅHAJ needs the CAP_NET_RAW capability, which can be obtained either by running as root, or by applying the capability on the executable with `sudo setcap cap_net_raw=eip openBLAHAJ`
+openBLÅHAJ needs the CAP_NET_RAW capability to listen on an interface, which can be obtained either by running as root, or by applying the capability on the executable with `sudo setcap cap_net_raw=eip openBLAHAJ`
 
-You can run openBLÅHAJ with sudo rights without any option, it will ask you to choose from a network interface, otherwise you can specify the following arguments:
+> [!NOTE]  
+> The setcap command is automatically run by `sudo make install`
+
+You can run openBLÅHAJ without any option, it will ask you to choose from a network interface, otherwise you can specify the following arguments:
 - `-i <interface>` to start a capture from the specified interface
 - `-o <file>` to read from a capture file
 - `-v [1-3]` to specify the level of information displayed
 - `-f <filter>` to apply a BPF filter
 
-Run `./openBLAHAJ --help` to see all available arguments.
+Run `openBLAHAJ --help` to see all available arguments.
+
+You can also run openBLÅHAJ on an executable, for example :
+```bash
+openBLAHAJ curl https://example.com
+```
+It can also be run as a shared library although this is not the preferred way of doing, with :
+```bash
+LD_PRELOAD=<prefix>/lib/libopenBLAHAJ.so curl https://example.com
+```
 
 openBLÅHAJ is also available as a Docker container (on oci.hixy.tk), you can run it with `docker run --rm --network=host --cap-add=CAP_NET_RAW -it oci.hixy.tk/nothixy/openblahaj:latest`.

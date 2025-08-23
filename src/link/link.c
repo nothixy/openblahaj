@@ -1,3 +1,4 @@
+#include "link/radiotap.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <pcap/dlt.h>
@@ -37,6 +38,10 @@ void link_cast(struct ob_protocol* buffer)
             buffer->dump = cooked_dump;
             break;
 
+        case DLT_IEEE802_11_RADIO: /* RadioTap */
+            buffer->dump = radiotap_dump;
+            break;
+
 #ifdef OB_BUILD_BLUETOOTH
         case DLT_BLUETOOTH_HCI_H4_WITH_PHDR: /* Bluetooth HCI with PHDR */
             buffer->dump = bt_dump;
@@ -50,6 +55,7 @@ void link_cast(struct ob_protocol* buffer)
 #endif
 
         default:
+            printf("0x%x\n", buffer->link_type);
             buffer->dump = binary_dump;
             break;
     }

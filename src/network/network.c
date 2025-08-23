@@ -3,10 +3,12 @@
 #ifdef HAVE_CONFIG_H
     #include "config.h"
 #endif
+#include "link/pppoe.h"
 #include "network/ip4.h"
 #include "network/ip6.h"
 #include "network/arp.h"
 #include "generic/binary.h"
+#include "link/ppp.h"
 #include "network/network.h"
 #include "generic/protocol.h"
 
@@ -32,8 +34,21 @@ void network_cast(uint16_t EthType, struct ob_protocol* buffer)
             buffer->dump = arp_dump;
             break;
 
+        case 0x8021:
+            buffer->dump = ppp_internet_protocol_control_protocol_dump;
+            break;
+
         case 0x86DD:
             buffer->dump = ipv6_dump;
+            break;
+
+        case 0x8863:
+        case 0x8864:
+            buffer->dump = pppoe_dump;
+            break;
+
+        case 0xC021:
+            buffer->dump = ppp_link_control_protocol_dump;
             break;
 
         default:
@@ -80,6 +95,9 @@ const char* network_get_name(uint16_t EthType)
 
         case 0x6004:
             return "DEC LAT";
+
+        case 0x8021:
+            return "Internet Protocol Control Protocol";
 
         case 0x8035:
             return "RARP";
@@ -218,6 +236,9 @@ const char* network_get_name(uint16_t EthType)
 
         case 0x9000:
             return "Ethernet Configuration Testing Protocol";
+
+        case 0xC021:
+            return "Link Control Protocol";
 
         case 0xF1C1:
             return "Redundancy Tag";

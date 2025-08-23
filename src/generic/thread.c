@@ -69,6 +69,7 @@ void register_signal_handler(void (*signal_function)(int), int signal)
     sa.sa_restorer = NULL;
     sa.sa_handler = signal_function;
 
+
     sigaction(signal, &sa, NULL);
 }
 

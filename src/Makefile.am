@@ -1,6 +1,6 @@
 bin_PROGRAMS = $(top_builddir)/openBLAHAJ
 AM_CFLAGS = -Wall -Wextra -I"$(top_srcdir)/include" -pedantic -Wconversion -Wno-cpp -Wno-padded -Wno-pedantic
-AM_LDFLAGS = -I"$(top_srcdir)/include"
+AM_LDFLAGS = -export-dynamic
 
 if STATIC_RELEASE
 AM_LDFLAGS += -static
@@ -20,7 +20,7 @@ else
 DBUS_SOURCE =
 endif
 
-__top_builddir__openBLAHAJ_SOURCES = \
+LIBRARY_SOURCES = \
 transport/transport.c \
 transport/ospf.c \
 transport/icmp6.c \
@@ -37,6 +37,9 @@ network/ip6.c \
 link/link.c \
 link/cooked.c \
 link/eth.c \
+link/pppoe.c \
+link/ppp.c \
+link/radiotap.c \
 application/mqtt.c \
 application/http.c \
 application/ftp.c \
@@ -55,6 +58,9 @@ application/application.c \
 application/dns.c \
 application/rip.c \
 application/tls.c \
+application/ntp.c \
+application/quic.c \
+application/http3.c \
 generic/bytes.c \
 generic/guid.c \
 generic/dash.c \
@@ -64,8 +70,20 @@ generic/binary.c \
 generic/time.c \
 generic/thread.c \
 openblahaj.c \
+hooks/socket.c \
+hooks/openssl.c \
+hooks/quiche.c \
+hooks/nss.c \
+hooks/printbuf.c \
 $(BT_SOURCE) \
 $(DBUS_SOURCE)
+
+lib_LTLIBRARIES = libopenBLAHAJ.la
+
+libopenBLAHAJ_la_SOURCES = $(LIBRARY_SOURCES)
+
+__top_builddir__openBLAHAJ_SOURCES = main.c
+__top_builddir__openBLAHAJ_LDADD = libopenBLAHAJ.la
 
 .PHONY: print
 print:
@@ -75,3 +93,4 @@ print:
 
 install-exec-hook:
 	setcap cap_net_raw=eip $(DESTDIR)$(bindir)/openBLAHAJ
+	ldconfig

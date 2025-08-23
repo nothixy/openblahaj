@@ -13,7 +13,7 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 #include <stdbool.h>
 #include <stddef.h>
-
+#include <stdio.h>
 
 typedef struct {
     const char* param_name;
@@ -25,7 +25,7 @@ typedef struct {
     bool param_optional;
 } dash_Longopt;
 
-bool dash_arg_parser(int* argc, char* argv[], dash_Longopt* options);
+bool dash_arg_parser(int* argc, char* argv[], dash_Longopt* options, bool non_arg_end_parse);
 void dash_print_usage(const char* argv0, const char* header, const char* footer, const char* required_arguments[], const dash_Longopt* options, FILE* output_file);
 void dash_print_summary(int argc, char** argv, const dash_Longopt* options, FILE* output_file);
 void dash_free(dash_Longopt* options);

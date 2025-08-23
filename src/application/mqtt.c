@@ -68,8 +68,6 @@ static void mqtt_dump_publish(struct ob_protocol* buffer, struct mqtt_header* mh
     ssize_t property_length_bytes;
     ssize_t topic_name_length_bytes;
 
-    // fprintf(stderr, "HERE WE ARAE, OFFSET = %u, QOS = %d\n", offset, (mh->flags & 0b110) >> 1);
-
     property_length_bytes = mqtt_decode_number(buffer, offset, &property_length);
     
     if (property_length_bytes != 0)

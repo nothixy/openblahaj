@@ -4,6 +4,7 @@
     #include "config.h"
 #endif
 #include "generic/binary.h"
+#include "application/ntp.h"
 #include "application/dns.h"
 #include "application/ftp.h"
 #include "application/pop.h"
@@ -12,6 +13,7 @@
 #include "application/http.h"
 #include "application/imap.h"
 #include "application/mqtt.h"
+#include "application/quic.h"
 #include "application/smtp.h"
 #include "application/ssdp.h"
 #include "generic/protocol.h"
@@ -34,6 +36,14 @@ static bool application_udp_cast(uint16_t port, struct ob_protocol* buffer)
         case 67:
         case 68: /* BOOTP */
             buffer->dump = bootp_dump;
+            break;
+
+        case 123: /* NTP */
+            buffer->dump = ntp_dump;
+            break;
+
+        case 443: /* QUIC */
+            buffer->dump = quic_dump;
             break;
 
         case 514: /* Syslog */
@@ -167,6 +177,9 @@ static const char* application_udp_get_name(uint16_t port)
         case 67:
         case 68:
             return "Bootp";
+
+        case 123:
+            return "NTP";
 
         case 443:
             return "QUIC HTTP/3";

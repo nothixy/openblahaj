@@ -14,7 +14,6 @@ AC_CONFIG_AUX_DIR([build-aux])
 AC_REQUIRE_AUX_FILE([tap-driver.sh])
 AM_INIT_AUTOMAKE([subdir-objects foreign -Wall])
 
-#AC_CANONICAL_HOST
 
 AX_CHECK_ENABLE_DEBUG(
 	[no],
@@ -86,13 +85,23 @@ AC_PROG_CC
 AC_PROG_AWK
 AC_PROG_INSTALL
 AC_PROG_MKDIR_P
+AM_PROG_AR
+LT_PREREQ([2.5.4])
+LT_INIT([disable-static])
 
 # Checks for libraries.
 AC_SEARCH_LIBS(
 	[pcap_init],
 	[pcap],
 	[],
-	[AC_MSG_ERROR([bad value ${enableval} for --enable-static])]
+	[AC_MSG_ERROR([Could not find library pcap])]
+)
+
+AC_SEARCH_LIBS(
+	[pow],
+	[m],
+	[],
+	[AC_MSG_ERROR([Could not find library math])]
 )
 
 # Checks for header files.

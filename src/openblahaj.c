@@ -1,4 +1,7 @@
+#define _GNU_SOURCE
+#include <dlfcn.h>
 #include <errno.h>
+#include <spawn.h>
 #include <stdio.h>
 #include <signal.h>
 #include <stdlib.h>
@@ -6,18 +9,41 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <termios.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
 #include <pcap/pcap.h>
 
 #ifdef HAVE_CONFIG_H
     #include "config.h"
 #endif
 #include "network/ip4.h"
+#include "hooks/stdio.h"
 #include "generic/dash.h"
+#include "hooks/socket.h"
+#include "hooks/openssl.h"
 #include "transport/tcp.h"
 #include "generic/thread.h"
 #include "transport/sctp.h"
 #include "generic/terminal.h"
 #include "generic/constants.h"
+
+const uint64_t LIBOB_MAGIC = 0x50524F544F434F4C;
+
+/**
+ * @brief Check if the program being run is openBLAHAJ
+ */
+static bool check_is_openblahaj()
+{
+    const char symb[] = "OB_MAGIC";
+    const char* ob_magic_sym = dlsym(RTLD_DEFAULT, symb);
+
+    if (ob_magic_sym == NULL)
+    {
+        return false;
+    }
+
+    return strncmp(ob_magic_sym, "PROTOCOL", 8) == 0;
+}
 
 /**
  * @brief List all interfaces and let the user select
@@ -373,7 +399,7 @@ static int setup_arguments(int* argc, char** argv, struct dash_arguments* args)
         NULL
     };
 
-    if (!dash_arg_parser(argc, argv, options))
+    if (!dash_arg_parser(argc, argv, options, true))
     {
         dash_print_usage(argv[0], OB_TITLE " - version " OB_VERSION, "", required_args, options, stderr);
         return -1;
@@ -397,7 +423,7 @@ static int setup_arguments(int* argc, char** argv, struct dash_arguments* args)
 /**
  * @brief Free memory used by all fragmented packets
  */
-static void free_fragmentated(void)
+static void free_fragmented(void)
 {
     for (uint32_t i = 0; i < (1 << 16); ++i)
     {
@@ -456,17 +482,189 @@ static void free_fragmentated(void)
     }
 }
 
-int main(int argc, char* argv[])
+/**
+ * @brief Fork and execute a new command with libopenBLAHAJ linked
+ * @param argc Argument count from ob_main()
+ * @param argv Arguments from ob_main()
+ * @return - -1 on fork or memory error
+ * @return - Status code of the program otherwise
+ */
+static int exec_single_command(int argc, char* argv[])
+{
+    int child_pid;
+    int usable_argc = argc - 1;
+    int return_code = -1;
+    int delta = 1;
+    char** argv_copy = NULL;
+    Dl_info info;
+    char* ob_init_done = getenv("OB_INIT_DONE");
+    extern char** environ;
+
+    if (ob_init_done != NULL && strcmp(ob_init_done, "1") == 0)
+    {
+        delta = 0;
+        usable_argc = argc;
+    }
+
+    if (check_is_openblahaj() && strcmp(argv[0], argv[1]) == 0)
+    {
+        fprintf(stderr, "[ERR] Can't execute self\n");
+        goto END;
+    }
+
+    argv_copy = malloc((size_t) (usable_argc + 1) * sizeof(char*));
+    if (argv_copy == NULL)
+    {
+        fprintf(stderr, "[ERR] Memory allocation error");
+        goto END;
+    }
+
+    for (int i = 0; i < usable_argc; ++i)
+    {
+        argv_copy[i] = argv[i + delta];
+    }
+    argv_copy[usable_argc] = NULL;
+
+    dladdr(&exec_single_command, &info);
+
+    setenv("LD_PRELOAD", info.dli_fname, 1);
+    setenv("OB_INIT_DONE", "1", 1);
+
+    if ((return_code = posix_spawnp(&child_pid, argv_copy[0], NULL, NULL, argv_copy, environ)) == 0)
+    {
+        waitpid(child_pid, &return_code, 0);
+    }
+    else
+    {
+        fprintf(stderr, "[ERR] Could not start program %s : [%d] %s\n", argv_copy[0], return_code, strerror(return_code));
+    }
+
+END:
+    free(argv_copy);
+    return return_code;
+}
+
+/**
+ * @brief Parse arguments from command line, setup options and libpcap
+ * @param argc Argument from ob_main()
+ * @param argv Arguments from ob_main()
+ * @param args Allowed command line arguments
+ * @param capture_args Options of this capture session
+ * @return - EXIT_SUCCESS on success
+ * @return - EXIT_FAILURE on error
+ * @note This should only be called from the openBLAHAJ executable
+ */
+static int ob_setup_args_and_pcap(int* argc, char** argv[], struct dash_arguments* args, struct passed_message* capture_args)
+{
+    int argument_setup_return;
+    long verbosity_level = 3;
+    int return_code = EXIT_FAILURE;
+
+    char* ob_init_done = getenv("OB_INIT_DONE");
+    if (ob_init_done == NULL || strcmp(ob_init_done, "1") != 0)
+    {
+        /**
+        * Read and parse command-line arguments
+        */
+        argument_setup_return = setup_arguments(argc, *argv, args);
+        if (argument_setup_return < 0)
+        {
+            goto END;
+        }
+
+        if (argument_setup_return > 0)
+        {
+            return_code = EXIT_SUCCESS;
+            goto END;
+        }
+    }
+
+    if (*argc > 1 && (args->input_file != NULL || args->interface != NULL))
+    {
+        fprintf(stderr, "[ERR] Can't run a command capture and capture from other sources\n");
+        goto END;
+    }
+
+    if (!args->list_interfaces)
+    {
+        print_logo();
+        set_title("%s", OB_NAME " - starting up");
+    }
+
+    if (args->verbosity_level)
+    {
+        char* end_ptr;
+        verbosity_level = strtol(args->verbosity_level, &end_ptr, 10);
+        if (args->verbosity_level == end_ptr || errno == ERANGE)
+        {
+            fprintf(stderr, "[ERR] Invalid verbosity level\n");
+            goto END;
+        }
+    }
+
+    if (args->max_packet_count)
+    {
+        char* end_ptr;
+        capture_args->max_packet_count = strtoll(args->max_packet_count, &end_ptr, 10);
+        if (args->max_packet_count == end_ptr || errno == ERANGE)
+        {
+            fprintf(stderr, "[ERR] Invalid max packet count\n");
+            goto END;
+        }
+
+        if (capture_args->max_packet_count <= 0)
+        {
+            fprintf(stderr, "[ERR] Max packet count must be strictly positive\n");
+            goto END;
+        }
+    }
+
+    if (verbosity_level <= 0 || verbosity_level > 3)
+    {
+        fprintf(stderr, "[ERR] Invalid verbosity level %ld, allowed range is [1-3]\n", verbosity_level);
+        goto END;
+    }
+
+    if (args->input_file != NULL && args->interface != NULL)
+    {
+        fprintf(stderr, "[ERR] Can't open an offline and online capture at the same time\n");
+        goto END;
+    }
+
+    if (args->input_file != NULL && args->save_file != NULL)
+    {
+        fprintf(stderr, "[ERR] Saving to a file requires opening a live capture\n");
+        goto END;
+    }
+
+    capture_args->verbosity_level = (uint8_t) verbosity_level;
+    capture_args->nocolor = args->nocolor;
+    capture_args->noprompt = args->noprompt;
+    capture_args->display_hostnames = args->display_hostnames;
+
+    return_code = EXIT_SUCCESS;
+END:
+    return return_code;
+}
+
+/**
+ * @brief Real entrypoint of openBLAHAJ
+ * @param argc Number of arguments
+ * @param argv Arguments
+ * @return - EXIT_SUCCESS on success
+ * @return - EXIT_FAILURE on error
+ * @return - Exit code of subprogram if applicable
+ */
+int ob_main(int argc, char* argv[])
 {
     int return_code = EXIT_FAILURE;
 
-    struct pcap_info* pcap = NULL;
     pcap_t* capture = NULL;
-    long verbosity_level = 3;
 
     sigset_t signals_end;
     sigset_t block_sigusr1;
     int received_signal;
+    int pcap_setup_return;
 
     pthread_t packet;
     pthread_t input = 0;
@@ -475,10 +673,6 @@ int main(int argc, char* argv[])
 
     struct termios old_terminal_mode;
     struct termios terminal_mode;
-
-    int pcap_setup_return;
-
-    int argument_setup_return;
 
     struct dash_arguments args = {
         .interface = NULL,
@@ -512,92 +706,56 @@ int main(int argc, char* argv[])
 
     char errbuf[PCAP_ERRBUF_SIZE];
 
-    sigemptyset(&signals_end);
-    sigaddset(&signals_end, SIGINT);
-    sigaddset(&signals_end, SIGTERM);
-    sigprocmask(SIG_BLOCK, &signals_end, NULL);
+    /**
+     * Don't overwrite library socket functions
+     */
+    socket_set_hooked(false);
 
     tcgetattr(STDIN_FILENO, &old_terminal_mode);
-    terminal_mode = old_terminal_mode;
-    terminal_mode.c_lflag &= (unsigned int) ~(ECHO | ICANON);
 
     /**
      * Init mutex for console printing
      */
     if (pthread_mutex_init(capture_args.console, NULL))
     {
+        capture_args.console = NULL;
         fprintf(stderr, "[ERR] Can't initialize mutex\n");
-        goto END;
+        goto PROGRAM_END;
     }
+
+    sigemptyset(&signals_end);
+    sigaddset(&signals_end, SIGINT);
+    sigaddset(&signals_end, SIGTERM);
+    sigprocmask(SIG_BLOCK, &signals_end, NULL);
+
+    terminal_mode = old_terminal_mode;
+    terminal_mode.c_lflag &= (unsigned int) ~(ECHO | ICANON);
 
     pthread_mutex_lock(capture_args.console);
 
     srand((unsigned int) time(NULL));
 
-    /**
-     * Read and parse command-line arguments
-     */
-    argument_setup_return = setup_arguments(&argc, argv, &args);
-    if (argument_setup_return < 0)
+    return_code = ob_setup_args_and_pcap(&argc, &argv, &args, &capture_args);
+    if (return_code)
     {
-        goto END;
-    }
-    if (argument_setup_return > 0)
-    {
-        return_code = EXIT_SUCCESS;
-        goto END;
+        goto PROGRAM_END;
     }
 
-    if (!args.list_interfaces)
+    if (argc > 1 || !check_is_openblahaj())
     {
-        print_logo();
-        set_title("%s", OB_NAME " - starting up");
-    }
-
-    if (args.verbosity_level)
-    {
-        char* end_ptr;
-        verbosity_level = strtol(args.verbosity_level, &end_ptr, 10);
-        if (args.verbosity_level == end_ptr || errno == ERANGE)
-        {
-            fprintf(stderr, "[ERR] Invalid verbosity level\n");
-            goto END;
-        }
-    }
-
-    if (args.max_packet_count)
-    {
-        char* end_ptr;
-        capture_args.max_packet_count = strtoll(args.max_packet_count, &end_ptr, 10);
-        if (args.max_packet_count == end_ptr || errno == ERANGE)
-        {
-            fprintf(stderr, "[ERR] Invalid max packet count\n");
-            goto END;
-        }
-
-        if (capture_args.max_packet_count <= 0)
-        {
-            fprintf(stderr, "[ERR] Max packet count must be strictly positive\n");
-            goto END;
-        }
-    }
-
-    if (verbosity_level <= 0 || verbosity_level > 3)
-    {
-        fprintf(stderr, "[ERR] Invalid verbosity level %ld, allowed range is [1-3]\n", verbosity_level);
-        goto END;
-    }
-
-    if (args.input_file != NULL && args.save_file != NULL)
-    {
-        fprintf(stderr, "[ERR] Saving to a file requires opening a live capture\n");
-        goto END;
+        #if !OB_BUILD_STATIC
+        return_code = exec_single_command(argc, argv) ? EXIT_FAILURE : EXIT_SUCCESS;
+        goto PROGRAM_END;
+        #else
+        fprintf(stderr, "[ERR] Unexpected argument %s\n", argv[1]);
+        goto PROGRAM_END;
+        #endif
     }
 
     if (pcap_init(PCAP_CHAR_ENC_LOCAL, errbuf))
     {
         fprintf(stderr, "[ERR] pcap_init(): %s\n", errbuf);
-        goto END;
+        goto PROGRAM_END;
     }
 
     /**
@@ -608,20 +766,16 @@ int main(int argc, char* argv[])
     if (pcap_setup_return < 0)
     {
         fprintf(stderr, "[ERR] pcap_setup() failed\n");
-        goto END;
+        goto PROGRAM_END;
     }
     if (pcap_setup_return > 1)
     {
         return_code = EXIT_SUCCESS;
-        goto END;
+        goto PROGRAM_END;
     }
 
     capture_args.capture = capture;
-    capture_args.verbosity_level = (uint8_t) verbosity_level;
-    capture_args.nocolor = args.nocolor;
-    capture_args.noprompt = args.noprompt;
     capture_args.min_read = pcap_setup_return;
-    capture_args.display_hostnames = args.display_hostnames;
 
     /**
      * Set terminal raw mode
@@ -669,7 +823,7 @@ int main(int argc, char* argv[])
     pthread_join(packet, NULL);
 
     return_code = EXIT_SUCCESS;
-END:
+PROGRAM_END:
     /**
      * Magic sequence to reset terminal encoding
      * https://www.in-ulm.de/~mascheck/various/alternate_charset/#solution
@@ -680,7 +834,8 @@ END:
     }
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &old_terminal_mode);
 
-    free_fragmentated();
+
+    free_fragmented();
 
     if (capture != NULL)
     {
@@ -696,7 +851,7 @@ END:
         pthread_mutex_unlock(capture_args.console);
         pthread_mutex_destroy(capture_args.console);
     }
-    free(pcap);
+
     free(args.interface);
     free(args.input_file);
     free(args.bpf_filter);
@@ -706,3 +861,95 @@ END:
 
     return return_code;
 }
+
+#if !OB_BUILD_STATIC
+int (*main_orig)(int argc, char* argv[], char* envp[]);
+
+/**
+ * @brief Hooked main function
+ * @param argc Argument count
+ * @param argv Arguments
+ * @param envp Environment variables
+ * @return Return code of target main function
+ */
+int main_hook(int argc, char* argv[], char* envp[])
+{
+    if (check_is_openblahaj())
+    {
+        return main_orig(argc, argv, envp);
+    }
+
+    char* ob_init_done = getenv("OB_INIT_DONE");
+    if (ob_init_done == NULL || strcmp(ob_init_done, "1") != 0)
+    {
+        setenv("OB_INIT_DONE", "1", 1);
+        return ob_main(argc, argv);
+    }
+
+    return main_orig(argc, argv, envp);
+}
+
+/**
+ * uClibc
+ */
+void __uClibc_main(
+    int (*main_ptr)(int, char **, char **),
+    int argc,
+	char **argv,
+    void (*app_init)(void),
+    void (*app_fini)(void),
+    void (*rtld_fini)(void),
+    void *stack_end
+)
+{
+    main_orig = main_ptr;
+    typeof(&__uClibc_main) orig = dlsym(RTLD_NEXT, "__uClibc_main");
+    return orig(main_hook, argc, argv, app_init, app_fini, rtld_fini, stack_end);
+}
+
+
+/**
+ * Glibc / Musl libc
+ */
+int __libc_start_main(
+    int (*main_ptr)(int argc, char* argv[], char* envp[]),
+    int argc,
+    char* argv[],
+    int (*init)(int argc, char* argv[], char* envp[]),
+    void (*fini)(void),
+    void (*rtld_fini)(void),
+    void* stack_end
+)
+{
+    main_orig = main_ptr;
+    typeof(&__libc_start_main) orig = dlsym(RTLD_NEXT, "__libc_start_main");
+    return orig(main_hook, argc, argv, init, fini, rtld_fini, stack_end);
+}
+
+/**
+ * Bionic (Android) libc
+ */
+typedef void init_func_t(int, char*[], char*[]);
+typedef void fini_func_t(void);
+typedef struct {
+  init_func_t** preinit_array;
+  init_func_t** init_array;
+  fini_func_t** fini_array;
+  // Below fields are only available in static executables.
+  size_t preinit_array_count;
+  size_t init_array_count;
+  size_t fini_array_count;
+} structors_array_t;
+
+void __libc_init(
+    void* raw_args,
+    void (*onexit)(void),
+    int (*slingshot)(int, char**, char**),
+    structors_array_t const* const structors
+)
+{
+    main_orig = slingshot;
+    typeof(&__libc_init) orig = dlsym(RTLD_NEXT, "__libc_start_main");
+    return orig(raw_args, onexit, main_hook, structors);
+}
+#endif
