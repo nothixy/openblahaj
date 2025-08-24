@@ -81,8 +81,6 @@ This project is released under the MIT license - check the [LICENSE.txt](LICENSE
 
 ## Building
 
----
-
 openBLÅHAJ uses the GNU Autotools build system. Use the following steps :
 
 1. (optional) Run `autoreconf -ivf` (this will regenerate the configure script)

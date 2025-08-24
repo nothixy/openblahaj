@@ -95,5 +95,6 @@ struct http_2_huffman {
 
 void http_dump(struct ob_protocol* buffer);
 void http_dump_text(const unsigned char* hdr, ssize_t length);
+void http_2_huffman_decode(const uint8_t* bytes, ssize_t length_bytes);
 
 #endif

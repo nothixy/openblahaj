@@ -376,7 +376,7 @@ static uint8_t get_bit_at_u64(uint64_t nbr, ssize_t index)
     return (nbr >> index) & 1;
 }
 
-static void http_2_huffman_decode(const uint8_t* bytes, ssize_t length_bytes)
+void http_2_huffman_decode(const uint8_t* bytes, ssize_t length_bytes)
 {
     ssize_t read_bits_begin = 0;
     bool done = false;
