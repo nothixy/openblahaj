@@ -28,7 +28,6 @@ captures/FTP.cap \
 captures/FTPv6-1.cap \
 captures/FTPv6-2.cap \
 captures/http.cap \
-captures/HTTP.cap \
 captures/HTTPS.cap \
 captures/HTTP_TCP_SPLIT.cap \
 captures/HTTPv6.cap \
