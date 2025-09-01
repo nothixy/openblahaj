@@ -1,5 +1,8 @@
 #include <dlfcn.h>
+#include <stdio.h>
 #include <quiche.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "hooks/printbuf.h"
 
@@ -8,16 +11,25 @@ ssize_t quiche_conn_recv(quiche_conn *conn, uint8_t *buf, size_t buf_len, const 
     typeof(&quiche_conn_recv) real_quiche_conn_recv = dlsym(RTLD_NEXT, "quiche_conn_recv");
     // printf("HOLE\n");
     ssize_t rc = real_quiche_conn_recv(conn, buf, buf_len, info);
-    printbuf(buf, (ssize_t) buf_len, 443, 443, false);
+    printbuf(buf, (ssize_t) rc - 16, 443, 443, false);
     return rc;
 }
 
 // ssize_t quiche_conn_send(quiche_conn *conn, uint8_t *out, size_t out_len, quiche_send_info *out_info)
 // {
 //     typeof(&quiche_conn_send) real_quiche_conn_send = dlsym(RTLD_NEXT, "quiche_conn_send");
-//     printf("HOEL\n");
+//     // printf("HOEL\n");
+//     uint8_t* out_copy = malloc(out_len);
+//     if (out_copy != NULL)
+//     {
+//         memcpy(out_copy, out, out_len);
+//     }
 //     ssize_t rc = real_quiche_conn_send(conn, out, out_len, out_info);
-//     printbuf(out, rc, 443, 443, false);
+//     if (out_copy != NULL)
+//     {
+//         printbuf(out_copy, rc, 443, 443, false);
+//         free(out_copy);
+//     }
 //     return rc;
 // }
 

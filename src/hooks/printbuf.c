@@ -78,6 +78,8 @@ void printbuf(void* buf, ssize_t size, uint16_t src_port, uint16_t dst_port, boo
         application_cast(tcp ? T_TRANSPORT_TCP : T_TRANSPORT_UDP, dst_port, &buffer);
     }
 
+    // binary_dump(&buffer);
+
     if ((jump_error = setjmp(*(buffer.catcher))) == 0)
     {
         buffer.dump(&buffer);

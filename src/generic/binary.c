@@ -16,6 +16,7 @@ static void binary_dump_v3(const struct ob_protocol* buffer)
     printf("--- BEGIN UNKNOWN PROTOCOL MESSAGE ---\n");
     for (ssize_t i = 0; i < buffer->length; i += 16)
     {
+        printf("%08lx ", i);
         for (uint8_t j = 0; j < 16; ++j)
         {
             if (i + j >= buffer->length)

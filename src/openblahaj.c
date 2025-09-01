@@ -1,4 +1,6 @@
+#include "application/quic.h"
 #define _GNU_SOURCE
+#define __USE_GNU
 #include <dlfcn.h>
 #include <errno.h>
 #include <spawn.h>
@@ -840,7 +842,7 @@ PROGRAM_END:
     }
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &old_terminal_mode);
 
-
+    quic_dump_remaining_crypto_data();
     free_fragmented();
 
     if (capture != NULL)

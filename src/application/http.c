@@ -1,4 +1,3 @@
-#include "generic/binary.h"
 #include <setjmp.h>
 #include <stdio.h>
 #include <string.h>
@@ -9,7 +8,6 @@
 #endif
 #include "application/http.h"
 #include "generic/protocol.h"
-#include "application/quic.h"
 
 const char HTTP_PRISM_INIT[] = "PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n";
 
@@ -946,11 +944,11 @@ static void http_dump_v3(const struct ob_protocol* buffer)
         return;
     }
 
-    if (strcmp(hdr, HTTP_PRISM_INIT) == 0)
+    if (strcmp((const char*) hdr, HTTP_PRISM_INIT) == 0)
     {
         connection_http2 = true;
         // binary_dump(buffer);
-        http_v2_dump(buffer, &hdr[sizeof(HTTP_PRISM_INIT) / sizeof(char) - 1], buffer->length - (ssize_t) (sizeof(HTTP_PRISM_INIT) / sizeof(char) + 1));
+        http_v2_dump(buffer, &hdr[sizeof(HTTP_PRISM_INIT) / sizeof(char) - 1], buffer->length - (ssize_t) (sizeof(HTTP_PRISM_INIT) / sizeof(char) - 1));
         return;
     }
 

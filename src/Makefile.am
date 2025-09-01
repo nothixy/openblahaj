@@ -87,6 +87,8 @@ generic/protocol.c \
 generic/binary.c \
 generic/time.c \
 generic/thread.c \
+filetypes/ber.c \
+filetypes/oid.c \
 openblahaj.c \
 hooks/socket.c \
 hooks/printbuf.c \

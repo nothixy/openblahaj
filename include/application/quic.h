@@ -24,5 +24,6 @@ struct quic_header_short {
 
 void quic_dump(struct ob_protocol* buffer);
 ssize_t quic_read_variable_number(const uint8_t* hdr, uint64_t* number);
+void quic_dump_remaining_crypto_data();
 
 #endif

@@ -3,15 +3,37 @@
 #include <string.h>
 #include <endian.h>
 
+#include "application/tls.h"
 #include "generic/binary.h"
 #include "application/quic.h"
 #include "application/http3.h"
 #include "generic/protocol.h"
 
 static uint8_t stream_data[1<<16] = {0};
+static uint8_t crypto_data[1<<16] = {0};
+static ssize_t crypto_length = 0;
+static bool has_dumped_once = false;
 
-static uint8_t done = 0;
+static uint8_t stream_done = 0;
+static bool stream_fin = false;
 static uint64_t max_length;
+
+void quic_dump_remaining_crypto_data()
+{
+    struct ob_protocol buffer;
+    ssize_t read_tls;
+    buffer.hdr = (void*) crypto_data;
+    buffer.length = crypto_length;
+    // binary_dump(&buffer);
+    while (buffer.length > 0)
+    {
+        uint8_t* hdr = (uint8_t*) buffer.hdr;
+        // binary_dump(buffer);
+        read_tls = tls_dump_handshake(&buffer);
+        buffer.length -= read_tls;
+        buffer.hdr = &hdr[read_tls];
+    }
+}
 
 ssize_t quic_read_variable_number(const uint8_t* hdr, uint64_t* number)
 {
@@ -44,12 +66,25 @@ ssize_t quic_read_variable_number(const uint8_t* hdr, uint64_t* number)
     return length;
 }
 
-static ssize_t quic_dump_frame_ack(const uint8_t* hdr, struct ob_protocol* buffer)
+static ssize_t quic_dump_frame_ack(const uint8_t* hdr, ssize_t length)
 {
-    // TODO: Write 
-    (void) hdr;
-    (void) buffer;
-    return 5;
+    // TODO: Write
+    ssize_t read_bytes = 1;
+    uint64_t largest_acknowledged;
+    uint64_t ack_delay;
+    uint64_t ack_range_count;
+    uint64_t first_ack_range;
+    read_bytes += quic_read_variable_number(&hdr[read_bytes], &largest_acknowledged);
+    read_bytes += quic_read_variable_number(&hdr[read_bytes], &ack_delay);
+    read_bytes += quic_read_variable_number(&hdr[read_bytes], &ack_range_count);
+    read_bytes += quic_read_variable_number(&hdr[read_bytes], &first_ack_range);
+
+    printf("%-45s = %lu\n", "Largest acknowledged", largest_acknowledged);
+    printf("%-45s = %lu\n", "ACK delay", ack_delay);
+    printf("%-45s = %lu\n", "ACK range count", ack_range_count);
+    printf("%-45s = %lu\n", "First ACK range", first_ack_range);
+
+    return read_bytes;
 }
 
 // static ssize_t quic_dump_stream_data(const uint8_t* hdr, struct ob_protocol* buffer)
@@ -60,41 +95,58 @@ static ssize_t quic_dump_frame_ack(const uint8_t* hdr, struct ob_protocol* buffe
 //     return 0;
 // }
 
-static ssize_t quic_dump_frames(const uint8_t* hdr, struct ob_protocol* buffer)
+static bool has_only_0_remaining(const uint8_t* hdr, ssize_t length)
 {
-    ssize_t original_length = buffer->length;
-    bool stop = false;
+    for (ssize_t i = 0; i < length; ++i)
+    {
+        if (hdr[i])
+        {
+            return false;
+        }
+    }
+    return true;
+}
 
-    while (buffer->length > 0 && !stop)
+static ssize_t quic_dump_frames(const uint8_t* hdr, ssize_t length, struct ob_protocol* buffer)
+{
+    ssize_t original_length = length;
+    bool stop = false;
+    // printf("RUN LENGTH %d\n", length);
+
+    while (length > 0 && !stop)
     {
         ssize_t read_bytes;
         uint8_t frame_type = hdr[0];
         switch (frame_type)
         {
             case 0x0: /* PADDING */
+                if (has_only_0_remaining(hdr, length))
+                {
+                    return length;
+                }
                 printf("--- BEGIN QUIC PADDING FRAME ---\n");
-                buffer->length -= 1;
+                length -= 1;
                 hdr = &hdr[1];
                 break;
 
             case 0x1: /* PING */
                 printf("--- BEGIN QUIC PING FRAME ---\n");
-                buffer->length -= 1;
+                length -= 1;
                 hdr = &hdr[1];
                 break;
 
             case 0x2:
             case 0x3: /* ACK */
                 printf("--- BEGIN QUIC ACK FRAME ---\n");
-                read_bytes = quic_dump_frame_ack(hdr, buffer);
-                buffer->length -= read_bytes;
+                read_bytes = quic_dump_frame_ack(hdr, length);
+                length -= read_bytes;
                 hdr = &hdr[read_bytes];
                 break;
 
             case 0x4: /* RESET STREAM */
                 printf("--- BEGIN QUIC RESET STREAM FRAME ---\n");
                 // NOT IMPLEMENTED
-                buffer->length = 0;
+                length = 0;
                 break;
 
             case 0x5: /* STOP SENDING */
@@ -109,12 +161,14 @@ static ssize_t quic_dump_frames(const uint8_t* hdr, struct ob_protocol* buffer)
                 printf("%-45s = %lu\n", "Stream ID", stream_id);
                 printf("%-45s = %lu\n", "Application protocol error code", application_protocol_error_code);
                 hdr = &hdr[off];
-                buffer->length -= off;
+                length -= off;
                 break;
             }
 
             case 0x6: /* CRYPTO */
             {
+                void* hdr_save = buffer->hdr;
+                ssize_t length_save = buffer->length;
                 ssize_t off = 1;
                 uint64_t offset;
                 uint64_t length;
@@ -123,17 +177,69 @@ static ssize_t quic_dump_frames(const uint8_t* hdr, struct ob_protocol* buffer)
                 printf("--- BEGIN QUIC CRYPTO FRAME ---\n");
                 printf("%-45s = %lu\n", "Offset", offset);
                 printf("%-45s = %lu\n", "Length", length);
+                // printf("Offset = %lu, crypto_data_has_0_byte = %d\n", offset, crypto_data_has_0_byte);
+                if (offset == 0)
+                {
+                    printf("Crypto length = %ld\n", crypto_length);
+                    if (!has_dumped_once)
+                    {
+                        printf("\033[1m[SAVED FOR LATER]\033[22m\n");
+                        memcpy(&crypto_data[offset], &hdr[off], length);
+                        if (length + offset >= crypto_length)
+                        {
+                            crypto_length = length + offset;
+                        }
+                        has_dumped_once = true;
+                    }
+                    else
+                    {
+                        printf("\033[1m[SAVED FOR LATER]\033[22m\n");
+                        printf("\033[1m[REASSEMBLY OF PREVIOUS CRYPTO, LENGTH = %ld]\033[22m\n", crypto_length);
+                        ssize_t read_tls;
+                        buffer->hdr = (void*) crypto_data;
+                        buffer->length = crypto_length;
+                        // binary_dump(buffer);
+                        while (buffer->length > 0)
+                        {
+                            uint8_t* hdr = (uint8_t*) buffer->hdr;
+                            // binary_dump(buffer);
+                            read_tls = tls_dump_handshake(buffer);
+                            printf("READ TLS = %ld\n", read_tls);
+                            buffer->length -= read_tls;
+                            buffer->hdr = &hdr[read_tls];
+                        }
+                        buffer->hdr = hdr_save;
+                        buffer->length = length_save;
+                        has_dumped_once = true;
+                        crypto_length = length;
+                        memset(crypto_data, 0, sizeof(crypto_data));
+                        memcpy(&crypto_data[offset], &hdr[off], length);
+                        if (length + offset >= crypto_length)
+                        {
+                            crypto_length = length + offset;
+                        }
+                    }
+                }
+                else
+                {
+                    printf("\033[1m[SAVED FOR LATER]\033[22m\n");
+                    memcpy(&crypto_data[offset], &hdr[off], length);
+                    if (length + offset >= crypto_length)
+                    {
+                        crypto_length = length + offset;
+                    }
+                }
                 off += (ssize_t) length;
                 // NOT IMPLEMENTED
                 hdr = &hdr[off];
-                buffer->length -= off;
+                length -= off;
                 break;
             }
 
             case 0x7: /* NEW TOKEN */
                 printf("--- BEGIN QUIC NEW TOKEN FRAME ---\n");
                 // NOT IMPLEMENTED
-                buffer->length = 0;
+                length = 0;
                 break;
 
             case 0x8:
@@ -172,7 +278,11 @@ static ssize_t quic_dump_frames(const uint8_t* hdr, struct ob_protocol* buffer)
 
                 if (stream_id == 0)
                 {
-                    done += 1;
+                    if (fin)
+                    {
+                        stream_fin = true;
+                    }
+                    stream_done += 1;
                     if (length + offset > max_length)
                     {
                         max_length = length + offset;
@@ -180,49 +290,48 @@ static ssize_t quic_dump_frames(const uint8_t* hdr, struct ob_protocol* buffer)
                     memcpy(&stream_data[offset], &hdr[off], length);
                 }
 
-
                 off += (ssize_t) length;
                 hdr = &hdr[off];
-                buffer->length -= off;
+                length -= off;
                 break;
             }
 
             case 0x10: /* MAX DATA */
                 printf("--- BEGIN QUIC MAX DATA FRAME ---\n");
                 // NOT IMPLEMENTED
-                buffer->length = 0;
+                length = 0;
                 break;
 
             case 0x11: /* MAX STREAM DATA */
                 printf("--- BEGIN QUIC MAX STREAM DATA FRAME ---\n");
                 // NOT IMPLEMENTED
-                buffer->length = 0;
+                length = 0;
                 break;
 
             case 0x12:
             case 0x13: /* MAX STREAMS */
                 printf("--- BEGIN QUIC MAX STREAMS FRAME ---\n");
                 // NOT IMPLEMENTED
-                buffer->length = 0;
+                length = 0;
                 break;
 
             case 0x14: /* DATA BLOCKED */
                 printf("--- BEGIN QUIC DATA BLOCKED FRAME ---\n");
                 // NOT IMPLEMENTED
-                buffer->length = 0;
+                length = 0;
                 break;
 
             case 0x15: /* STREAM DATA BLOCKED */
                 printf("--- BEGIN QUIC STREAM DATA BLOCKED FRAME ---\n");
                 // NOT IMPLEMENTED
-                buffer->length = 0;
+                length = 0;
                 break;
 
             case 0x16:
             case 0x17: /* STREAMS BLOCKED */
                 printf("--- BEGIN QUIC STREAMS BLOCKED FRAME ---\n");
                 // NOT IMPLEMENTED
-                buffer->length = 0;
+                length = 0;
                 break;
 
             case 0x18: /* NEW CONNECTION ID */
@@ -239,53 +348,65 @@ static ssize_t quic_dump_frames(const uint8_t* hdr, struct ob_protocol* buffer)
                 printf("%-45s = %lu\n", "Sequence number", sequence_number);
                 printf("%-45s = %lu\n", "Retire prior to", retire_prior_to);
                 printf("%-45s = %u\n", "Length", length);
+                printf("%-45s = ", "Connection ID");
+                for (uint8_t i = 0; i < length; ++i)
+                {
+                    printf("%02x", hdr[off + i]);
+                }
+                printf("\n");
                 off += length;
+                printf("%-45s = ", "Stateless reset token");
+                for (uint8_t i = 0; i < 128 / 8; ++i)
+                {
+                    printf("%02x", hdr[off + i]);
+                }
+                printf("\n");
                 off += (128 / 8);
                 hdr = &hdr[off];
-                buffer->length -= off;
+                length -= off;
                 break;
             }
 
             case 0x19: /* RETIRE CONNECTION ID */
                 printf("--- BEGIN QUIC RETIRE CONNECTION ID FRAME ---\n");
                 // NOT IMPLEMENTED
-                buffer->length = 0;
+                length = 0;
                 break;
 
             case 0x1A: /* PATH CHALLENGE */
                 printf("--- BEGIN QUIC PATH CHALLENGE FRAME ---\n");
                 // NOT IMPLEMENTED
-                buffer->length = 0;
+                length = 0;
                 break;
 
             case 0x1B: /* PATH RESPONSE */
                 printf("--- BEGIN QUIC PATH RESPONSE FRAME ---\n");
                 // NOT IMPLEMENTED
-                buffer->length = 0;
+                length = 0;
                 break;
 
             case 0x1C:
             case 0x1D: /* CONNECTION CLOSE */
                 printf("--- BEGIN QUIC CONNECTION CLOSE FRAME ---\n");
                 // NOT IMPLEMENTED
-                buffer->length = 0;
+                length = 0;
                 break;
 
             case 0x1E: /* HANDSHAKE DONE */
                 printf("--- BEGIN QUIC HANDSHAKE DONE FRAME ---\n");
                 hdr = &hdr[1];
-                buffer->length -= 1;
+                length -= 1;
                 break;
 
             default:
                 stop = true;
-                buffer->length = 0;
+                length = 0;
                 break;
         }
     }
 
     // printf("HAS DATA LEFT = %d\n", buffer->length);
-    return original_length - buffer->length;
+    return original_length - length;
 }
 
 static ssize_t quic_dump_long_packet(const uint8_t* hdr, struct ob_protocol* buffer)
@@ -349,10 +470,15 @@ static ssize_t quic_dump_long_packet(const uint8_t* hdr, struct ob_protocol* buf
                 packet_number |= hdr[read_length + 3];
             }
 
+            read_length += (ssize_t) packet_number_length + 1;
+
             printf("%-45s = %u\n", "Packet number", packet_number);
 
-            read_length += (ssize_t) data_length;
-            printf("%-45s = %ld\n", "Read length", read_length);
+            quic_dump_frames(&hdr[read_length], (ssize_t) data_length, buffer);
+
+            read_length += (ssize_t) (data_length - packet_number_length - 1);
+
+            // printf("%-45s = %ld\n", "Read length", read_length);
             break;
 
         case 1: /* 0-RTT */
@@ -363,8 +489,29 @@ static ssize_t quic_dump_long_packet(const uint8_t* hdr, struct ob_protocol* buf
             read_length += quic_read_variable_number(&hdr[read_length], &data_length);
             printf("%-45s = %lu\n", "Data length", data_length);
 
-            read_length += (ssize_t) data_length;
-            printf("%-45s = %ld\n", "Read length", read_length);
+            packet_number = hdr[read_length];
+            if (packet_number_length >= 1)
+            {
+                packet_number <<= 8;
+                packet_number |= hdr[read_length + 1];
+            }
+            if (packet_number_length >= 2)
+            {
+                packet_number <<= 8;
+                packet_number |= hdr[read_length + 2];
+            }
+            if (packet_number_length >= 3)
+            {
+                packet_number <<= 8;
+                packet_number |= hdr[read_length + 3];
+            }
+
+            read_length += (ssize_t) packet_number_length + 1;
+
+            quic_dump_frames(&hdr[read_length], (ssize_t) data_length, buffer);
+
+            read_length += (ssize_t) (data_length - packet_number_length - 1);
+            // printf("%-45s = %ld\n", "Read length", read_length);
             break;
 
         case 3: /* RETRY PACKET */
@@ -449,9 +596,10 @@ static void quic_dump_v3(struct ob_protocol* buffer)
             // printf("BUFFER LENGTH IS %d\n", buffer->length);
             // printf("BYTES ARE %d %d %d\n", hdr[-1], hdr[0], hdr[1]);
 
-            read_length = quic_dump_frames(hdr, buffer);
+            read_length = quic_dump_frames(hdr, buffer->length, buffer);
             // return;
             hdr = &hdr[read_length];
+            buffer->length -= read_length;
         }
 
         // binary_dump(buffer);
@@ -461,13 +609,14 @@ static void quic_dump_v3(struct ob_protocol* buffer)
 
     // printf("LESS GOOO\n");
 
-    
-    if (done == 3)
+    // printf("FIN = %d\n", stream_fin);
+
+    if (stream_done >= 3 && stream_fin)
     {
         buffer->length = (ssize_t) max_length;
         buffer->hdr = stream_data;
         http3_dump(buffer);
-        done = 0;
+        stream_done = 0;
         // for (uint64_t i = 0; i < max_length; ++i)
         // {
         //     putc(stream_data[i], stdout);
