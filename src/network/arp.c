@@ -5,7 +5,6 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <net/if_arp.h>
-#include <netinet/ether.h>
 
 #ifdef HAVE_CONFIG_H
     #include "config.h"

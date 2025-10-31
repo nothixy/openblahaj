@@ -1,13 +1,12 @@
 #include <stdio.h>
 #include <endian.h>
 #include <string.h>
-#include <net/ethernet.h>
-#include <netinet/ether.h>
 #include <ctype.h>
 
 #ifdef HAVE_CONFIG_H
     #include "config.h"
 #endif
+#include "link/eth.h"
 #include "link/link.h"
 #include "link/cooked.h"
 #include "network/arp.h"

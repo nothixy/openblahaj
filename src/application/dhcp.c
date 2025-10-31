@@ -1,17 +1,13 @@
 #include <stdio.h>
 #include <endian.h>
 #include <stdint.h>
-#include <stdlib.h>
 #include <string.h>
 #include <arpa/inet.h>
-#include <netinet/ether.h>
 
 #ifdef HAVE_CONFIG_H
     #include "config.h"
 #endif
 #include "link/eth.h"
-#include "network/ip4.h"
-#include "network/ip6.h"
 #include "generic/guid.h"
 #include "generic/bytes.h"
 #include "application/dhcp.h"

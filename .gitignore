@@ -10,3 +10,5 @@ tests/Makefile.in
 config.h.in~
 configure~
 .vscode/
+static_doc/*.ods
+src/*/.deps

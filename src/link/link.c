@@ -1,3 +1,4 @@
+#include "link/802_15_4.h"
 #include "link/radiotap.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,6 +43,10 @@ void link_cast(struct ob_protocol* buffer)
             buffer->dump = radiotap_dump;
             break;
 
+        case DLT_IEEE802_15_4_WITHFCS: /* IEEE 802.15.4 with FCS */
+            buffer->dump = lrwpan_dump;
+            break;
+
 #ifdef OB_BUILD_BLUETOOTH
         case DLT_BLUETOOTH_HCI_H4_WITH_PHDR: /* Bluetooth HCI with PHDR */
             buffer->dump = bt_dump;
@@ -75,6 +80,9 @@ const char* link_get_name(int LinkType)
 
         case DLT_LINUX_SLL:
             return "Linux cooked capture";
+
+        case DLT_IEEE802_15_4_WITHFCS:
+            return "IEEE 802.15.4 with FCS";
 
         case DLT_BLUETOOTH_HCI_H4_WITH_PHDR:
             return "Bluetooth HCI with PHDR";

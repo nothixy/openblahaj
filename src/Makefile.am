@@ -52,8 +52,10 @@ network/ip4.c \
 network/ip.c \
 network/arp.c \
 network/ip6.c \
+network/zigbee.c \
 link/link.c \
 link/cooked.c \
+link/802_15_4.c \
 link/eth.c \
 link/pppoe.c \
 link/ppp.c \
@@ -79,6 +81,7 @@ application/tls.c \
 application/ntp.c \
 application/quic.c \
 application/http3.c \
+application/bgp.c \
 generic/bytes.c \
 generic/guid.c \
 generic/dash.c \

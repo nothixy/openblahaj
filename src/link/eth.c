@@ -2,8 +2,6 @@
 #include <endian.h>
 #include <stdlib.h>
 #include <string.h>
-#include <net/ethernet.h>
-#include <netinet/ether.h>
 
 #ifdef HAVE_CONFIG_H
     #include "config.h"
@@ -11,6 +9,21 @@
 #include "link/eth.h"
 #include "network/network.h"
 #include "generic/protocol.h"
+
+char* ether_ntoa(const struct ether_addr* addr)
+{
+    static char ether_addr_str[18] = {0};
+    int index = 0;
+    for (uint8_t i = 0; i < 6; ++i)
+    {
+        snprintf(&ether_addr_str[index], 3, "%02x", addr->addr[i]);
+        index += 2;
+        ether_addr_str[index] = ':';
+        index += 1;
+    }
+    ether_addr_str[17] = '\0';
+    return ether_addr_str;
+}
 
 static void eth_dump_v3(const struct ether_header* hdr)
 {

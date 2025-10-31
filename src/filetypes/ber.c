@@ -237,7 +237,7 @@ void ber_print_with_type(uint8_t* hdr, struct ob_protocol* buffer, uint64_t leng
             break;
 
         default:
-            printf("UNSUPPOERTED 0x%x\n", type);
+            printf("UNSUPPORTED 0x%lx\n", type);
             for (uint64_t i = 0; i < length; ++i)
             {
                 printf("%02x", hdr[i]);

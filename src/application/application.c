@@ -1,3 +1,5 @@
+#include "application/bgp.h"
+#include "network/zigbee.h"
 #include <stdlib.h>
 
 #ifdef HAVE_CONFIG_H
@@ -42,6 +44,10 @@ static bool application_udp_cast(uint16_t port, struct ob_protocol* buffer)
             buffer->dump = ntp_dump;
             break;
 
+        case 179: /* BGP */
+            buffer->dump = bgp_dump;
+            break;
+
         case 443: /* QUIC */
             buffer->dump = quic_dump;
             break;
@@ -64,6 +70,10 @@ static bool application_udp_cast(uint16_t port, struct ob_protocol* buffer)
 
         case 5353: /* mDNS */
             buffer->dump = dns_dump;
+            break;
+
+        case 17754: /* ZigBee encapsulation protocol */
+            buffer->dump = zep_dump;
             break;
 
         case 51000: /* Wireguard */
@@ -110,6 +120,10 @@ static bool application_tcp_cast(uint16_t port, struct ob_protocol* buffer)
             buffer->dump = imap_dump;
             break;
 
+        case 179: /* BGP */
+            buffer->dump = bgp_dump;
+            break;
+
         case 443: /* HTTPS */
             buffer->dump = tls_dump;
             break;
@@ -132,6 +146,10 @@ static bool application_sctp_cast(uint16_t port, struct ob_protocol* buffer)
     {
         case 80:
             buffer->dump = http_dump;
+            break;
+
+        case 179: /* BGP */
+            buffer->dump = bgp_dump;
             break;
 
         default:
@@ -181,6 +199,9 @@ static const char* application_udp_get_name(uint16_t port)
         case 123:
             return "NTP";
 
+        case 179:
+            return "BGP";
+
         case 443:
             return "QUIC HTTP/3";
 
@@ -192,6 +213,9 @@ static const char* application_udp_get_name(uint16_t port)
 
         case 521:
             return "RIPng";
+
+        case 17754:
+            return "ZigBee encapsulation protocol";
 
         case 51000:
             return "Wireguard";
@@ -226,6 +250,9 @@ static const char* application_tcp_get_name(uint16_t port)
         case 143:
             return "IMAP";
 
+        case 179:
+            return "BGP";
+
         case 443:
             return "HTTPS";
 
@@ -240,6 +267,9 @@ static const char* application_sctp_get_name(uint16_t port)
     {
         case 80:
             return "HTTP";
+
+        case 179:
+            return "BGP";
 
         default:
             return "Unknown";
