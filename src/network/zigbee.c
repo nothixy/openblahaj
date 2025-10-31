@@ -1,11 +1,15 @@
+#include <stdio.h>
+#include <endian.h>
+#include <setjmp.h>
+#include <string.h>
+
+#ifdef HAVE_CONFIG_H
+    #include "config.h"
+#endif
 #include "network/zigbee.h"
 #include "generic/constants.h"
 #include "generic/protocol.h"
 #include "link/802_15_4.h"
-#include <endian.h>
-#include <setjmp.h>
-#include <stdio.h>
-#include <string.h>
 
 static const uint16_t ZEP_PREAMBLE = 0x4558;
 static const uint8_t ZEP_LENGTH_MASK = 0x7f;

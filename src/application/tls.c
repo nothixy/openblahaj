@@ -1,16 +1,16 @@
-#include "filetypes/ber.h"
-#include "generic/binary.h"
+#include <stdio.h>
 #include <endian.h>
 #include <setjmp.h>
 #include <signal.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <string.h>
 
 #ifdef HAVE_CONFIG_H
-    #include "config.h"
+#include "config.h"
 #endif
 #include "generic/bytes.h"
+#include "filetypes/ber.h"
+#include "generic/binary.h"
 #include "application/tls.h"
 #include "generic/protocol.h"
 

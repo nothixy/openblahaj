@@ -1,8 +1,11 @@
-#include <setjmp.h>
 #include <stdio.h>
-#include <string.h>
 #include <endian.h>
+#include <setjmp.h>
+#include <string.h>
 
+#ifdef HAVE_CONFIG_H
+    #include "config.h"
+#endif
 #include "application/tls.h"
 #include "generic/binary.h"
 #include "application/quic.h"

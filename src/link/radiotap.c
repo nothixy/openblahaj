@@ -1,11 +1,12 @@
-#include <setjmp.h>
 #include <stdio.h>
 #include <endian.h>
+#include <setjmp.h>
 #include <string.h>
 
 #ifdef HAVE_CONFIG_H
     #include "config.h"
 #endif
+#include "generic/bytes.h"
 #include "link/radiotap.h"
 #include "generic/binary.h"
 #include "network/network.h"

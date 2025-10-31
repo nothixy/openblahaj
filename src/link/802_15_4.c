@@ -1,8 +1,8 @@
-#include <endian.h>
 #include <setjmp.h>
 #include <stdio.h>
 #include <string.h>
 
+#include "generic/bytes.h"
 #include "link/802_15_4.h"
 #include "generic/binary.h"
 #include "generic/constants.h"

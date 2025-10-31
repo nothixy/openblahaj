@@ -1,8 +1,12 @@
+#include <stdio.h>
 #include <endian.h>
 #include <setjmp.h>
-#include <stdio.h>
 #include <string.h>
 
+#ifdef HAVE_CONFIG_H
+    #include "config.h"
+#endif
+#include "generic/bytes.h"
 #include "application/bgp.h"
 #include "generic/protocol.h"
 #include "generic/constants.h"

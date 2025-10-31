@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <endian.h>
 #include <stdlib.h>
 #include <string.h>
 #include <arpa/inet.h>
@@ -8,6 +7,7 @@
     #include "config.h"
 #endif
 #include "network/ip6.h"
+#include "generic/bytes.h"
 #include "generic/protocol.h"
 #include "application/ripng.h"
 

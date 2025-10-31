@@ -1,14 +1,14 @@
-#include <setjmp.h>
 #include <stdio.h>
 #include <endian.h>
+#include <setjmp.h>
 #include <string.h>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-
 #include "link/ppp.h"
 #include "network/ip4.h"
+#include "generic/bytes.h"
 #include "generic/binary.h"
 #include "generic/protocol.h"
 

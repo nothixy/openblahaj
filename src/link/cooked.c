@@ -1,7 +1,7 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <endian.h>
 #include <string.h>
-#include <ctype.h>
 
 #ifdef HAVE_CONFIG_H
     #include "config.h"
@@ -10,6 +10,7 @@
 #include "link/link.h"
 #include "link/cooked.h"
 #include "network/arp.h"
+#include "generic/bytes.h"
 #include "generic/binary.h"
 #include "network/network.h"
 

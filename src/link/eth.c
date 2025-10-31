@@ -7,6 +7,7 @@
     #include "config.h"
 #endif
 #include "link/eth.h"
+#include "generic/bytes.h"
 #include "network/network.h"
 #include "generic/protocol.h"
 

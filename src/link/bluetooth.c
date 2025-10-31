@@ -8,6 +8,7 @@
 #ifdef HAVE_CONFIG_H
     #include "config.h"
 #endif
+#include "generic/bytes.h"
 #include "link/bluetooth.h"
 #include "generic/protocol.h"
 

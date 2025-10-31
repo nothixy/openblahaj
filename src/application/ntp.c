@@ -1,17 +1,18 @@
-#include "generic/time.h"
-#include "network/ip4.h"
-#include "network/ip6.h"
-#include <arpa/inet.h>
 #include <math.h>
 #include <netdb.h>
-#include <netinet/in.h>
 #include <stdio.h>
+#include <endian.h>
 #include <stddef.h>
 #include <string.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
 
 #ifdef HAVE_CONFIG_H
-    #include "config.h"
+#include "config.h"
 #endif
+#include "network/ip4.h"
+#include "network/ip6.h"
+#include "generic/time.h"
 #include "generic/bytes.h"
 #include "application/ntp.h"
 

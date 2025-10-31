@@ -1,5 +1,4 @@
 #include <netdb.h>
-#include <netinet/in.h>
 #include <stdio.h>
 #include <endian.h>
 #include <stddef.h>
@@ -7,6 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <netinet/in.h>
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
 #include <netinet/udp.h>

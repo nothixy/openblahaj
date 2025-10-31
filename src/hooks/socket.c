@@ -1,12 +1,13 @@
-#include <stdbool.h>
 #include <dlfcn.h>
 #include <stdio.h>
+#include <endian.h>
+#include <stdbool.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
 #include "hooks/socket.h"
-#include "generic/protocol.h"
 #include "hooks/printbuf.h"
+#include "generic/protocol.h"
 
 static bool hooked = true;
 

@@ -5,9 +5,9 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-
 #include "link/ppp.h"
 #include "link/pppoe.h"
+#include "generic/bytes.h"
 #include "generic/binary.h"
 #include "generic/protocol.h"
 

@@ -7,6 +7,7 @@
     #include "config.h"
 #endif
 #include "link/dbus.h"
+#include "generic/bytes.h"
 #include "generic/protocol.h"
 
 /**

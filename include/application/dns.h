@@ -1,8 +1,6 @@
 #ifndef OB_DNS_H
 #define OB_DNS_H
 
-#include <endian.h>
-
 #include "generic/protocol.h"
 
 struct dns_header {
