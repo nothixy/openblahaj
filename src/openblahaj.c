@@ -3,7 +3,6 @@
 #define __USE_GNU
 #include <dlfcn.h>
 #include <errno.h>
-#include <spawn.h>
 #include <stdio.h>
 #include <signal.h>
 #include <stdlib.h>
@@ -493,7 +492,7 @@ static void free_fragmented(void)
  */
 static int exec_single_command(int argc, char* argv[])
 {
-    int child_pid;
+    pid_t pid;
     int usable_argc = argc - 1;
     int return_code = -1;
     int delta = 1;
@@ -532,13 +531,19 @@ static int exec_single_command(int argc, char* argv[])
     setenv("LD_PRELOAD", info.dli_fname, 1);
     setenv("OB_INIT_DONE", "1", 1);
 
-    if ((return_code = posix_spawnp(&child_pid, argv_copy[0], NULL, NULL, argv_copy, environ)) == 0)
+    switch ((pid = fork()))
     {
-        waitpid(child_pid, &return_code, 0);
-    }
-    else
-    {
-        fprintf(stderr, "[ERR] Could not start program %s : [%d] %s\n", argv_copy[0], return_code, strerror(return_code));
+        case -1:
+            fprintf(stderr, "[ERR] Could not start program %s : [%d] %s\n", argv_copy[0], return_code, strerror(return_code));
+            break;
+
+        case 0:
+            return_code = execvpe(argv_copy[0], argv_copy, environ);
+            break;
+
+        default:
+            waitpid(pid, &return_code, 0);
+            break;
     }
 
 END:
