@@ -2,7 +2,6 @@
 #include <endian.h>
 #include <string.h>
 #include <arpa/inet.h>
-#include <netinet/igmp.h>
 
 #ifdef HAVE_CONFIG_H
     #include "config.h"
@@ -10,7 +9,7 @@
 #include "generic/bytes.h"
 #include "transport/igmp.h"
 
-static const char* igmp_get_type(uint8_t type)
+static const char* igmp_get_type(enum RGMP_TYPE type)
 {
     switch (type)
     {
@@ -60,9 +59,9 @@ static void igmp_dump_v3(const struct ob_protocol* buffer, const struct igmp* ih
 {
     char igmp_group[INET_ADDRSTRLEN] = {0};
 
-    inet_ntop(AF_INET, &(ih->igmp_group), igmp_group, INET_ADDRSTRLEN);
+    inet_ntop(AF_INET, &(ih->Group), igmp_group, INET_ADDRSTRLEN);
 
-    if (ih->igmp_type >= RGMP_TYPE_LEAVE_GROUP)
+    if (ih->Type >= RGMP_TYPE_LEAVE_GROUP)
     {
         printf("--- BEGIN RGMP MESSAGE ---\n");
     }
@@ -70,12 +69,12 @@ static void igmp_dump_v3(const struct ob_protocol* buffer, const struct igmp* ih
     {
         printf("--- BEGIN IGMP MESSAGE ---\n");
     }
-    printf("%-45s = 0x%x (%s)\n", "Type", ih->igmp_type, igmp_get_type(ih->igmp_type));
-    if (ih->igmp_type < RGMP_TYPE_LEAVE_GROUP)
+    printf("%-45s = 0x%x (%s)\n", "Type", ih->Type, igmp_get_type(ih->Type));
+    if (ih->Type < RGMP_TYPE_LEAVE_GROUP)
     {
-        printf("%-45s = 0x%x\n", "Code", ih->igmp_code);
+        printf("%-45s = 0x%x\n", "Code", ih->Code);
     }
-    printf("%-45s = 0x%x %s\n", "Checksum", be16toh(ih->igmp_cksum), checksum_16bitonescomplement_validate(buffer, buffer->length, be16toh(ih->igmp_cksum), false));
+    printf("%-45s = 0x%x %s\n", "Checksum", be16toh(ih->Checksum), checksum_16bitonescomplement_validate(buffer, buffer->length, be16toh(ih->Checksum), false));
     printf("%-45s = %s\n", "Group", igmp_group);
 }
 
@@ -83,9 +82,9 @@ static void igmp_dump_v2(const struct igmp* ih)
 {
     char igmp_group[INET_ADDRSTRLEN] = {0};
 
-    inet_ntop(AF_INET, &(ih->igmp_group), igmp_group, INET_ADDRSTRLEN);
+    inet_ntop(AF_INET, &(ih->Group), igmp_group, INET_ADDRSTRLEN);
 
-    if (ih->igmp_type >= RGMP_TYPE_LEAVE_GROUP)
+    if (ih->Type >= RGMP_TYPE_LEAVE_GROUP)
     {
         printf("RGMP => ");
     }
@@ -93,10 +92,10 @@ static void igmp_dump_v2(const struct igmp* ih)
     {
         printf("IGMP => ");
     }
-    printf("Type : %s, ", igmp_get_type(ih->igmp_type));
-    if (ih->igmp_type < RGMP_TYPE_LEAVE_GROUP)
+    printf("Type : %s, ", igmp_get_type(ih->Type));
+    if (ih->Type < RGMP_TYPE_LEAVE_GROUP)
     {
-        printf("Code : 0x%x, ", ih->igmp_code);
+        printf("Code : 0x%x, ", ih->Code);
     }
     printf("Group : %s\n", igmp_group);
 }

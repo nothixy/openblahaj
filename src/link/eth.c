@@ -17,7 +17,7 @@ char* ether_ntoa(const struct ether_addr* addr)
     int index = 0;
     for (uint8_t i = 0; i < 6; ++i)
     {
-        snprintf(&ether_addr_str[index], 3, "%02x", addr->addr[i]);
+        snprintf(&ether_addr_str[index], 3, "%02x", addr->Addr[i]);
         index += 2;
         ether_addr_str[index] = ':';
         index += 1;
@@ -32,12 +32,12 @@ static void eth_dump_v3(const struct ether_header* hdr)
 
     printf("--- BEGIN ETHERNET MESSAGE ---\n");
 
-    ethernet = ether_ntoa((const struct ether_addr*) &(hdr->ether_shost));
+    ethernet = ether_ntoa((const struct ether_addr*) &(hdr->Src));
     printf("%-45s = %s\n", "Destination", ethernet);
-    ethernet = ether_ntoa((const struct ether_addr*) &(hdr->ether_dhost));
+    ethernet = ether_ntoa((const struct ether_addr*) &(hdr->Dst));
     printf("%-45s = %s\n", "Source", ethernet);
 
-    printf("%-45s = 0x%x (%s)\n", "Type", be16toh(hdr->ether_type), network_get_name(be16toh(hdr->ether_type)));
+    printf("%-45s = 0x%x (%s)\n", "Type", be16toh(hdr->EtherType), network_get_name(be16toh(hdr->EtherType)));
 }
 
 static void eth_dump_v2(const struct ether_header* hdr)
@@ -46,12 +46,12 @@ static void eth_dump_v2(const struct ether_header* hdr)
 
     printf("Ethernet => ");
 
-    ethernet = ether_ntoa((const struct ether_addr*) &(hdr->ether_dhost));
+    ethernet = ether_ntoa((const struct ether_addr*) &(hdr->Dst));
     printf("Destination : %s, ", ethernet);
-    ethernet = ether_ntoa((const struct ether_addr*) &(hdr->ether_shost));
+    ethernet = ether_ntoa((const struct ether_addr*) &(hdr->Src));
     printf("Source : %s, ", ethernet);
 
-    printf("Type : %s\n", network_get_name(be16toh(hdr->ether_type)));
+    printf("Type : %s\n", network_get_name(be16toh(hdr->EtherType)));
 }
 
 void eth_dump(struct ob_protocol* buffer)
@@ -83,7 +83,7 @@ void eth_dump(struct ob_protocol* buffer)
             break;
     }
 
-    network_cast(be16toh(eh.ether_type), buffer);
+    network_cast(be16toh(eh.EtherType), buffer);
     buffer->length -= (ssize_t) ether_header_length;
     buffer->hdr = &hdr[ether_header_length];
 
