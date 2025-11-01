@@ -962,7 +962,7 @@ void __libc_init(
 )
 {
     main_orig = slingshot;
-    typeof(&__libc_init) orig = dlsym(RTLD_NEXT, "__libc_start_main");
+    typeof(&__libc_init) orig = dlsym(RTLD_NEXT, "__libc_init");
     return orig(raw_args, onexit, main_hook, structors);
 }
 #endif
