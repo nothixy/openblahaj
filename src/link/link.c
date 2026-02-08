@@ -32,7 +32,17 @@ void link_cast(struct ob_protocol* buffer)
             break;
 
         case DLT_RAW:
-            buffer->dump = ipv6_dump;
+            switch (((uint8_t*) (buffer->hdr))[0] >> 4)
+            {
+                case 4:
+                    buffer->dump = ipv4_dump;
+                    break;
+                case 6:
+                    buffer->dump = ipv6_dump;
+                    break;
+                default:
+                    break;
+            }
             break;
 
         case DLT_LINUX_SLL: /* Cooked */
